@@ -7,6 +7,8 @@ end
 
 require 'bundler/setup'
 require 'preservation/client'
+require 'webmock/rspec'
+require 'pry'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
