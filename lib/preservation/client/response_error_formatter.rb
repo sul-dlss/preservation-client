@@ -4,10 +4,10 @@ module Preservation
   class Client
     # Format HTTP response-related errors
     class ResponseErrorFormatter
-      DEFAULT_BODY = 'Response from preservation-catalog did not contain a body. \
-                      Check honeybadger for preservation-catalog for backtraces, \
-                      and look into adding a `rescue_from` in preservation-catalog \
-                      to provide more details to the client in the future.'
+      DEFAULT_BODY = 'Response from preservation-catalog did not contain a body. '\
+                     'Check honeybadger for preservation-catalog for backtraces, '\
+                     'and look into adding a `rescue_from` in preservation-catalog '\
+                     'to provide more details to the client in the future.'
 
       def self.format(response:, object_id: nil, client_method_name: nil)
         new(response: response, object_id: object_id, client_method_name: client_method_name).format
