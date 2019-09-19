@@ -1,12 +1,13 @@
 env:
   global:
-    - CC_TEST_REPORTER_ID=47b57fbbf65654b17f33b6ff4a108ce2abed31a86468033f20eb4d4e9e09935a
+    - CC_TEST_REPORTER_ID=02e8afad8d0b699828dd69b6f45b598e7317b2d9828ea23380c3a97113068a0c
 
 dist: bionic
 language: ruby
 cache: bundler
 rvm:
   - 2.5.3
+  - 2.6.4
 
 env:
   - "RAILS_VERSION=5.2.3"
