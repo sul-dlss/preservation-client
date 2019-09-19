@@ -40,9 +40,9 @@ module Preservation
 
     include Singleton
 
-    # @return [Dor::Services::Client::Objects] an instance of the `Client::Objects` class
+    # @return [Preservation::Client::Objects] an instance of the `Client::Objects` class
     def objects
-      @objects ||= Objects.new(connection: connection, version: DEFAULT_API_VERSION)
+      @objects ||= Objects.new(connection: connection, api_version: DEFAULT_API_VERSION)
     end
 
     class << self
@@ -72,6 +72,7 @@ module Preservation
         builder.use ErrorFaradayMiddleware
         builder.use Faraday::Request::UrlEncoded
 
+        builder.adapter Faraday.default_adapter
         builder.headers[:user_agent] = user_agent
       end
     end
