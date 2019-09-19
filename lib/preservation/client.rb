@@ -20,7 +20,7 @@ end
 
 loader = Zeitwerk::Loader.new
 loader.inflector = PreservationClientInflector.new
-loader.push_dir(File.absolute_path("#{__FILE__}/../../.."))
+loader.push_dir(File.absolute_path("#{__FILE__}/../.."))
 loader.setup
 
 module Preservation
