@@ -1,7 +1,7 @@
 [![Gem Version](https://badge.fury.io/rb/preservaton-client.svg)](https://badge.fury.io/rb/preservation-client)
-[![Build Status](https://travis-ci.com/sul-dlss/preservation-client.svg?branch=master)](https://travis-ci.com/sul-dlss/preservation-client)
-[![Code Climate](https://codeclimate.com/github/sul-dlss/preservation-client/badges/gpa.svg)](https://codeclimate.com/github/sul-dlss/preservation-client)
-[![Code Climate Test Coverage](https://codeclimate.com/github/sul-dlss/preservation/badges/coverage.svg)](https://codeclimate.com/github/sul-dlss/preservation-client/coverage)
+[![Build Status](https://travis-ci.org/sul-dlss/preservation-client.svg?branch=master)](https://travis-ci.org/sul-dlss/preservation-client)
+[![Maintainability](https://api.codeclimate.com/v1/badges/00d2d8957226777105b3/maintainability)](https://codeclimate.com/github/sul-dlss/preservation-client/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/00d2d8957226777105b3/test_coverage)](https://codeclimate.com/github/sul-dlss/preservation-client/test_coverage)
 
 # Preservation::Client
 
@@ -28,7 +28,7 @@ Or install it yourself as:
 To configure and use the client, here's an example:
 
 ```ruby
-require 'dor/services/client'
+require 'preservation/client'
 
 def do_the_thing
   # This API endpoint returns an integer
@@ -38,7 +38,7 @@ end
 private
 
 def client
-  @client ||= Preservation::Client.configure(url: Settings.dor_services.url)
+  @client ||= Preservation::Client.configure(url: Settings.preservation_catalog.url)
 end
 ```
 
@@ -52,9 +52,9 @@ TBD
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bundle` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `lib/preservation/client/version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
