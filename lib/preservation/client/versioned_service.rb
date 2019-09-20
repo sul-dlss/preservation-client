@@ -21,12 +21,15 @@ module Preservation
         end
         return resp.body if resp.success?
 
-        errmsg = ResponseErrorFormatter.format(response: resp, object_id: object_id, client_method_name: caller_method_name)
+        errmsg = ResponseErrorFormatter
+                 .format(response: resp, object_id: object_id, client_method_name: caller_method_name)
         raise Preservation::Client::UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
-        raise Preservation::Client::NotFoundError, "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        raise Preservation::Client::NotFoundError, errmsg
       rescue Faraday::ParsingError, Faraday::RetriableResponse => e
-        raise Preservation::Client::UnexpectedResponseError, "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        raise Preservation::Client::UnexpectedResponseError, errmsg
       end
     end
   end
