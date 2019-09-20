@@ -8,6 +8,7 @@ Layout/EmptyLinesAroundClassBody:
 
 Metrics/BlockLength:
   Exclude:
+    - 'preservation-client.gemspec'
     - 'spec/**/*'
 
 Metrics/LineLength:
