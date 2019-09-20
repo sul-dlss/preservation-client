@@ -9,3 +9,5 @@
 .rspec_status
 
 Gemfile.lock
+
+.pry_history
