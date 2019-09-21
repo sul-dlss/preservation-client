@@ -2,7 +2,6 @@
 [![Build Status](https://travis-ci.org/sul-dlss/preservation-client.svg?branch=master)](https://travis-ci.org/sul-dlss/preservation-client)
 [![Maintainability](https://api.codeclimate.com/v1/badges/00d2d8957226777105b3/maintainability)](https://codeclimate.com/github/sul-dlss/preservation-client/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/00d2d8957226777105b3/test_coverage)](https://codeclimate.com/github/sul-dlss/preservation-client/test_coverage)
-[![Coverage Status](https://coveralls.io/repos/github/sul-dlss/preservation-client/badge.svg)](https://coveralls.io/github/sul-dlss/preservation-client)
 
 # Preservation::Client
 
