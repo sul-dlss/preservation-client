@@ -12,10 +12,11 @@ RSpec.describe Preservation::Client::Objects do
 
   describe '#current_version' do
     let(:path) { "objects/#{druid}.json" }
+    let(:druid) { 'druid:oo000oo0000' }
 
     context 'when API request succeeds' do
       let(:result_version) { 3 }
-      let(:valid_response) do
+      let(:valid_response_body) do
         {
           'id': 666,
           'druid': druid,
@@ -27,29 +28,16 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get_json).with(path, druid, 'current_version').and_return(valid_response)
+        allow(subject).to receive(:get_json).with(path, druid, 'current_version').and_return(valid_response_body)
       end
 
-      context 'with full druid' do
-        let(:druid) { 'druid:oo000oo0000' }
-
-        it 'returns the current version as an integer' do
-          expect(subject.current_version(druid)).to eq result_version
-        end
-      end
-
-      context 'with bare druid' do
-        let(:druid) { 'oo000oo0000' }
-
-        it 'returns the current version as an integer' do
-          expect(subject.current_version(druid)).to eq result_version
-        end
+      it 'returns the current version as an integer' do
+        expect(subject.current_version(druid)).to eq result_version
       end
     end
 
     context 'when API request fails' do
       let(:err_msg) { 'Mistakes were made.' }
-      let(:druid) { 'oo000oo0000' }
 
       before do
         allow(subject).to receive(:get_json).with(path, druid, 'current_version').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
