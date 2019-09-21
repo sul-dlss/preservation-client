@@ -3,7 +3,7 @@
 module Preservation
   class Client
     # @abstract API calls to a versioned endpoint
-    class VersionedService
+    class VersionedApiService
       def initialize(connection:, api_version:)
         @connection = connection
         @api_version = api_version
