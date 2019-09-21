@@ -24,3 +24,6 @@ Style/Documentation:
   Exclude:
     - 'spec/**/*'
     - 'lib/preservation/client.rb'
+
+Style/WordArray:
+  Enabled: false
