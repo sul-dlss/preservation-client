@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Preservation::Client::VersionedService do
+RSpec.describe Preservation::Client::VersionedApiService do
   let(:prez_api_url) { 'https://prezcat.example.com' }
   let(:druid) { 'oo000oo0000' }
   let(:caller_method_name) { 'my_method_name' }

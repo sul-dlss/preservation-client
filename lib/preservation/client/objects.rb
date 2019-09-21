@@ -3,7 +3,7 @@
 module Preservation
   class Client
     # API calls that are about Preserved Objects
-    class Objects < VersionedService
+    class Objects < VersionedApiService
 
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
       # @return [Integer] the current version of the Preserved Object
