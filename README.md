@@ -49,7 +49,9 @@ Note that the preservation service is behind a firewall.
 
 ## API Coverage
 
-TBD
+- Preservation::Client.objects.current_version('oo000oo0000')  (can also be 'druid:oo000oo0000')
+- Preservation::Client.objects.checksums(druids: druids) - will return raw csv
+- Preservation::Client.objects.checksums(druids: druids, format: 'json') - will return json
 
 ## Development
 
