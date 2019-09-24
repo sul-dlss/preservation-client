@@ -25,13 +25,15 @@ RSpec.describe Preservation::Client::VersionedApiService do
     let(:api_version) { subject.send(:api_version) }
 
     it 'request url includes api_version when it is non-blank' do
-      stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: 'have api version', status: 200)
-      expect(subject.send(:get_json, path, druid, caller_method_name)).to eq 'have api version'
+      resp_body = JSON.generate(foo: 'have api version')
+      stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
+      expect(subject.send(:get_json, path, druid, caller_method_name)).to eq JSON.parse(resp_body)
     end
     it 'request url has no api_version when it is blank' do
       pc = described_class.new(connection: conn, api_version: '')
-      stub_request(:get, "#{prez_api_url}/#{path}").to_return(body: 'blank api version', status: 200)
-      expect(pc.send(:get_json, path, druid, caller_method_name)).to eq 'blank api version'
+      resp_body = JSON.generate(bar: 'blank api version')
+      stub_request(:get, "#{prez_api_url}/#{path}").to_return(body: resp_body, status: 200)
+      expect(pc.send(:get_json, path, druid, caller_method_name)).to eq JSON.parse(resp_body)
     end
 
     context 'when response status success' do
@@ -39,7 +41,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
 
       it 'returns response body' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
-        expect(subject.send(:get_json, path, druid, caller_method_name)).to eq resp_body
+        expect(subject.send(:get_json, path, druid, caller_method_name)).to eq JSON.parse(resp_body)
       end
     end
 
