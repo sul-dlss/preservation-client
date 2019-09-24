@@ -20,7 +20,7 @@ module Preservation
           req.headers['Content-Type'] = 'application/json'
           req.headers['Accept'] = 'application/json'
         end
-        return resp.body if resp.success?
+        return JSON.parse(resp.body).with_indifferent_access if resp.success?
 
         errmsg = ResponseErrorFormatter
                  .format(response: resp, object_id: object_id, client_method_name: caller_method_name)
