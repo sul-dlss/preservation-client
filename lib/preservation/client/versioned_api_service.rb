@@ -15,21 +15,27 @@ module Preservation
 
       # @param path [String] path to be appended to connection url (no leading slash)
       def get_json(path, object_id, caller_method_name)
+        req_url = api_version.present? ? "#{api_version}/#{path}" : path
         resp = connection.get do |req|
-          req.url api_version.present? ? "#{api_version}/#{path}" : path
+          req.url req_url
           req.headers['Content-Type'] = 'application/json'
           req.headers['Accept'] = 'application/json'
         end
         return JSON.parse(resp.body).with_indifferent_access if resp.success?
 
-        errmsg = ResponseErrorFormatter
-                 .format(response: resp, object_id: object_id, client_method_name: caller_method_name)
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        if resp.status == 404
+          errmsg = "#{object_id} not found in Preservation at #{connection.url_prefix}#{req_url}"
+          raise Preservation::Client::NotFoundError, errmsg
+        else
+          errmsg = ResponseErrorFormatter
+                   .format(response: resp, object_id: object_id, client_method_name: caller_method_name)
+          raise Preservation::Client::UnexpectedResponseError, errmsg
+        end
       rescue Faraday::ResourceNotFound => e
-        errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "HTTP GET to #{connection.url_prefix}#{req_url} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::NotFoundError, errmsg
       rescue Faraday::ParsingError, Faraday::RetriableResponse => e
-        errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "HTTP GET to #{connection.url_prefix}#{req_url} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::UnexpectedResponseError, errmsg
       end
 

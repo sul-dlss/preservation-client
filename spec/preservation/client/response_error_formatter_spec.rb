@@ -60,7 +60,7 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
 
   describe '#format' do
     it 'formats an error message from attributes in the instance' do
-      exp_msg = "Preservation::Client.#{method_name} for #{druid} got #{resp_status_msg} (#{resp_code}) from Preservation Catalog at #{resp_env_url}: #{resp_body}"
+      exp_msg = "Preservation::Client.#{method_name} for #{druid} got #{resp_status_msg} (#{resp_code}) from Preservation at #{resp_env_url}: #{resp_body}"
       expect(formatter.format).to eq(exp_msg)
     end
 
@@ -68,7 +68,7 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
       subject(:formatter) { described_class.new(response: response, object_id: '', client_method_name: 'whatever') }
 
       it 'has sensible error message without object id' do
-        exp_msg = "Preservation::Client.whatever got #{resp_status_msg} (#{resp_code}) from Preservation Catalog at #{resp_env_url}: #{resp_body}"
+        exp_msg = "Preservation::Client.whatever got #{resp_status_msg} (#{resp_code}) from Preservation at #{resp_env_url}: #{resp_body}"
         expect(formatter.format).to eq(exp_msg)
       end
     end
@@ -77,7 +77,7 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
       let(:response) { double(Faraday::Response, reason_phrase: nil, status: resp_code, body: resp_body, env: resp_env) }
 
       it 'has sensible error message without reason_phrase id' do
-        exp_msg = "Preservation::Client.#{method_name} for #{druid} got #{resp_code} from Preservation Catalog at #{resp_env_url}: #{resp_body}"
+        exp_msg = "Preservation::Client.#{method_name} for #{druid} got #{resp_code} from Preservation at #{resp_env_url}: #{resp_body}"
         expect(formatter.format).to eq(exp_msg)
       end
     end

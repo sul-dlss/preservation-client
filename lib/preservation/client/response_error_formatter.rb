@@ -28,7 +28,7 @@ module Preservation
         status_info = status_msg.blank? ? status_code : "#{status_msg} (#{status_code})"
         object_id_info = " for #{object_id}" if object_id.present?
 
-        "Preservation::Client.#{client_method_name}#{object_id_info} got #{status_info} from Preservation Catalog at #{req_url}: #{body}"
+        "Preservation::Client.#{client_method_name}#{object_id_info} got #{status_info} from Preservation at #{req_url}: #{body}"
       end
     end
   end

@@ -46,6 +46,11 @@ RSpec.describe Preservation::Client::VersionedApiService do
     end
 
     context 'when response status NOT success' do
+      it '404 status code' do
+        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 404)
+        exp_msg = "#{druid} not found in Preservation at #{prez_api_url}/#{api_version}/#{path}"
+        expect { subject.send(:get_json, path, druid, caller_method_name) }.to raise_error(Preservation::Client::NotFoundError, exp_msg)
+      end
       it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 500)
         expect { subject.send(:get_json, path, druid, caller_method_name) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
@@ -55,7 +60,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
     context 'when Faraday::ResourceNotFound raised' do
       it 'raises Preservation::Client::NotFoundError' do
         allow(conn).to receive(:get).and_raise(Faraday::ResourceNotFound, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::ResourceNotFound}: #{faraday_err_msg}"
+        exp_err_msg = "HTTP GET to #{prez_api_url}/#{api_version}/#{path} failed with #{Faraday::ResourceNotFound}: #{faraday_err_msg}"
         expect { subject.send(:get_json, path, druid, caller_method_name) }.to raise_error(Preservation::Client::NotFoundError, exp_err_msg)
       end
     end
@@ -63,7 +68,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
     context 'when Faraday::ParsingError raised' do
       it 'raises Preservation::Client::UnexpectedResponseError' do
         allow(conn).to receive(:get).and_raise(Faraday::ParsingError, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::ParsingError}: #{faraday_err_msg}"
+        exp_err_msg = "HTTP GET to #{prez_api_url}/#{api_version}/#{path} failed with #{Faraday::ParsingError}: #{faraday_err_msg}"
         expect { subject.send(:get_json, path, druid, caller_method_name) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
       end
     end
@@ -71,7 +76,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
     context 'when Faraday::RetriableResponse raised' do
       it 'raises Preservation::Client::UnexpectedResponseError' do
         allow(conn).to receive(:get).and_raise(Faraday::RetriableResponse, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::RetriableResponse}: #{faraday_err_msg}"
+        exp_err_msg = "HTTP GET to #{prez_api_url}/#{api_version}/#{path} failed with #{Faraday::RetriableResponse}: #{faraday_err_msg}"
         expect { subject.send(:get_json, path, druid, caller_method_name) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
       end
     end
