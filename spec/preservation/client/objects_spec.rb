@@ -29,7 +29,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get_json).with(path, druid, 'current_version').and_return(valid_response_body)
+        allow(subject).to receive(:get_json).with(path, druid).and_return(valid_response_body)
       end
 
       it 'returns the current version as an integer' do
@@ -39,7 +39,7 @@ RSpec.describe Preservation::Client::Objects do
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get_json).with(path, druid, 'current_version').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(subject).to receive(:get_json).with(path, druid).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
@@ -64,7 +64,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:post).with(path, params, 'checksums').and_return(valid_csv_response)
+        allow(subject).to receive(:post).with(path, params).and_return(valid_csv_response)
       end
 
       it 'returns the API response' do
@@ -74,7 +74,7 @@ RSpec.describe Preservation::Client::Objects do
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:post).with(path, params, 'checksums').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(subject).to receive(:post).with(path, params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
@@ -103,11 +103,11 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_return(valid_response_body)
       end
 
       it 'returns the content file' do
-        expect(subject.content(file_druid, filename)).to eq valid_response_body
+        expect(subject.content(druid: file_druid, filepath: filename)).to eq valid_response_body
       end
 
       it 'returns the content file for specified version' do
@@ -117,18 +117,18 @@ RSpec.describe Preservation::Client::Objects do
             filepath: filename,
             version: '6'
           }
-        allow(subject).to receive(:get).with(file_api_path, my_file_api_params, 'file').and_return(valid_response_body)
-        expect(subject.content(file_druid, filename, '6')).to eq valid_response_body
+        allow(subject).to receive(:get).with(file_api_path, my_file_api_params).and_return(valid_response_body)
+        expect(subject.content(druid: file_druid, filepath: filename, version: '6')).to eq valid_response_body
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.content(file_druid, filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { subject.content(druid: file_druid, filepath: filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -155,11 +155,11 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_return(valid_response_body)
       end
 
       it 'returns the manifest file' do
-        expect(subject.manifest(file_druid, manifest_filename)).to eq valid_response_body
+        expect(subject.manifest(druid: file_druid, filepath: manifest_filename)).to eq valid_response_body
       end
 
       it 'returns the manifest file for specified version' do
@@ -169,18 +169,18 @@ RSpec.describe Preservation::Client::Objects do
             filepath: manifest_filename,
             version: '6'
           }
-        allow(subject).to receive(:get).with(file_api_path, my_file_api_params, 'file').and_return(valid_response_body)
-        expect(subject.manifest(file_druid, manifest_filename, '6')).to eq valid_response_body
+        allow(subject).to receive(:get).with(file_api_path, my_file_api_params).and_return(valid_response_body)
+        expect(subject.manifest(druid: file_druid, filepath: manifest_filename, version: '6')).to eq valid_response_body
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.manifest(file_druid, manifest_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { subject.manifest(druid: file_druid, filepath: manifest_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -209,11 +209,11 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_return(valid_response_body)
       end
 
       it 'returns the metadata file' do
-        expect(subject.metadata(file_druid, metadata_filename)).to eq valid_response_body
+        expect(subject.metadata(druid: file_druid, filepath: metadata_filename)).to eq valid_response_body
       end
 
       it 'returns the metadata file for specified version' do
@@ -223,18 +223,18 @@ RSpec.describe Preservation::Client::Objects do
             filepath: metadata_filename,
             version: '6'
           }
-        allow(subject).to receive(:get).with(file_api_path, my_file_api_params, 'file').and_return(valid_response_body)
-        expect(subject.metadata(file_druid, metadata_filename, '6')).to eq valid_response_body
+        allow(subject).to receive(:get).with(file_api_path, my_file_api_params).and_return(valid_response_body)
+        expect(subject.metadata(druid: file_druid, filepath: metadata_filename, version: '6')).to eq valid_response_body
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.metadata(file_druid, metadata_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { subject.metadata(druid: file_druid, filepath: metadata_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -261,7 +261,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_return(valid_response_body)
       end
 
       it 'returns the signature catalog file' do
@@ -271,7 +271,7 @@ RSpec.describe Preservation::Client::Objects do
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
