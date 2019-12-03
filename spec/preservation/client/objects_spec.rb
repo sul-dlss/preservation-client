@@ -9,6 +9,7 @@ RSpec.describe Preservation::Client::Objects do
 
   let(:conn) { Preservation::Client.instance.send(:connection) }
   let(:subject) { described_class.new(connection: conn, api_version: '') }
+  let(:err_msg) { 'Mistakes were made.' }
 
   describe '#current_version' do
     let(:path) { "objects/#{druid}.json" }
@@ -37,8 +38,6 @@ RSpec.describe Preservation::Client::Objects do
     end
 
     context 'when API request fails' do
-      let(:err_msg) { 'Mistakes were made.' }
-
       before do
         allow(subject).to receive(:get_json).with(path, druid, 'current_version').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
@@ -74,14 +73,209 @@ RSpec.describe Preservation::Client::Objects do
     end
 
     context 'when API request fails' do
-      let(:err_msg) { 'Mistakes were made.' }
-
       before do
         allow(subject).to receive(:post).with(path, params, 'checksums').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
         expect { subject.checksums(druids: druids) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
+  let(:file_api_path) { "objects/#{file_druid}/file" }
+  let(:file_druid) { 'druid:oo000oo0000' }
+  let(:manifest_filename) { 'signatureCatalog.xml' }
+
+  describe '#content' do
+    let(:filename) { 'content.pdf' }
+    let(:file_api_params) do
+      {
+        category: 'content',
+        filepath: filename,
+        version: nil
+      }
+    end
+
+    context 'when API request succeeds' do
+      let(:valid_response_body) do
+        File.open("spec/fixtures/#{filename}").read
+      end
+
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+      end
+
+      it 'returns the content file' do
+        expect(subject.content(file_druid, filename)).to eq valid_response_body
+      end
+
+      it 'returns the content file for specified version' do
+        my_file_api_params =
+          {
+            category: 'content',
+            filepath: filename,
+            version: '6'
+          }
+        allow(subject).to receive(:get).with(file_api_path, my_file_api_params, 'file').and_return(valid_response_body)
+        expect(subject.content(file_druid, filename, '6')).to eq valid_response_body
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { subject.content(file_druid, filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
+  describe '#manifest' do
+    let(:file_api_params) do
+      {
+        category: 'manifest',
+        filepath: manifest_filename,
+        version: nil
+      }
+    end
+
+    context 'when API request succeeds' do
+      let(:valid_response_body) do
+        <<-XML
+          <!-- byte and blockCount are off, but irrelevant -->
+          <signatureCatalog objectId="druid:zz555zz5555" versionId="2" catalogDatetime="2016-06-14T21:59:49Z" fileCount="1" byteCount="1953086" blockCount="1924">
+            <entry originalVersion="1" groupId="content" storagePath="eric-smith-dissertation-augmented.pdf">
+              <fileSignature size="905566" md5="93802f1a639bc9215c6336ff5575ee22" sha1="32f7129a81830004f0360424525f066972865221" sha256="a67276820853ddd839ba614133f1acd7330ece13f1082315d40219bed10009de"/>
+            </entry>
+          </signatureCatalog>
+        XML
+      end
+
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+      end
+
+      it 'returns the manifest file' do
+        expect(subject.manifest(file_druid, manifest_filename)).to eq valid_response_body
+      end
+
+      it 'returns the manifest file for specified version' do
+        my_file_api_params =
+          {
+            category: 'manifest',
+            filepath: manifest_filename,
+            version: '6'
+          }
+        allow(subject).to receive(:get).with(file_api_path, my_file_api_params, 'file').and_return(valid_response_body)
+        expect(subject.manifest(file_druid, manifest_filename, '6')).to eq valid_response_body
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { subject.manifest(file_druid, manifest_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
+  describe '#metadata' do
+    let(:metadata_filename) { 'identityMetadata.xml' }
+    let(:file_api_params) do
+      {
+        category: 'metadata',
+        filepath: metadata_filename,
+        version: nil
+      }
+    end
+
+    context 'when API request succeeds' do
+      let(:valid_response_body) do
+        <<-XML
+        <identityMetadata>
+          <sourceId source="sul">PC0170_s3_4th_of_July_2010-07-04_095432_0003</sourceId>
+          <objectId>druid:oo000oo0000</objectId>
+          <objectCreator>DOR</objectCreator>
+          <objectLabel>some label</objectLabel>
+          <objectType>item</objectType>
+        </identityMetadata>
+        XML
+      end
+
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+      end
+
+      it 'returns the metadata file' do
+        expect(subject.metadata(file_druid, metadata_filename)).to eq valid_response_body
+      end
+
+      it 'returns the metadata file for specified version' do
+        my_file_api_params =
+          {
+            category: 'metadata',
+            filepath: metadata_filename,
+            version: '6'
+          }
+        allow(subject).to receive(:get).with(file_api_path, my_file_api_params, 'file').and_return(valid_response_body)
+        expect(subject.metadata(file_druid, metadata_filename, '6')).to eq valid_response_body
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { subject.metadata(file_druid, metadata_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
+  describe '#signature_catalog' do
+    let(:file_api_params) do
+      {
+        category: 'manifest',
+        filepath: manifest_filename,
+        version: nil
+      }
+    end
+
+    context 'when API request succeeds' do
+      let(:valid_response_body) do
+        <<-XML
+          <!-- byte and blockCount are off, but irrelevant -->
+          <signatureCatalog objectId="druid:zz555zz5555" versionId="2" catalogDatetime="2016-06-14T21:59:49Z" fileCount="1" byteCount="1953086" blockCount="1924">
+            <entry originalVersion="1" groupId="content" storagePath="eric-smith-dissertation-augmented.pdf">
+              <fileSignature size="905566" md5="93802f1a639bc9215c6336ff5575ee22" sha1="32f7129a81830004f0360424525f066972865221" sha256="a67276820853ddd839ba614133f1acd7330ece13f1082315d40219bed10009de"/>
+            </entry>
+          </signatureCatalog>
+        XML
+      end
+
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_return(valid_response_body)
+      end
+
+      it 'returns the signature catalog file' do
+        expect(subject.signature_catalog(file_druid)).to eq valid_response_body
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params, 'file').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { subject.signature_catalog(file_druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
