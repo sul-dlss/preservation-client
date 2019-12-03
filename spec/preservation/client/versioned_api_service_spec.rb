@@ -82,6 +82,65 @@ RSpec.describe Preservation::Client::VersionedApiService do
     end
   end
 
+  describe '#get' do
+    let(:path) { 'my_path' }
+    let(:params) { { foo: 'bar' } }
+    let(:params_as_args) { 'foo=bar' }
+    let(:api_version) { subject.send(:api_version) }
+
+    it 'request url includes api_version when it is non-blank' do
+      stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}")
+        .to_return(body: 'have api version', status: 200)
+      expect(subject.send(:get, path, params, caller_method_name)).to eq 'have api version'
+    end
+    it 'request url has no api_version when it is blank' do
+      pc = described_class.new(connection: conn, api_version: '')
+      stub_request(:get, "#{prez_api_url}/#{path}?#{params_as_args}").to_return(body: 'blank api version', status: 200)
+      expect(pc.send(:get, path, params, caller_method_name)).to eq 'blank api version'
+    end
+
+    context 'when response status success' do
+      let(:resp_body) { "I'm a little teacup" }
+
+      it 'returns response body' do
+        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}")
+          .to_return(body: resp_body, status: 200)
+        expect(subject.send(:get, path, params, caller_method_name)).to eq resp_body
+      end
+    end
+
+    context 'when response status NOT success' do
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 500)
+        expect { subject.send(:get, path, params, caller_method_name) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
+      end
+    end
+
+    context 'when Faraday::ResourceNotFound raised' do
+      it 'raises Preservation::Client::NotFoundError' do
+        allow(conn).to receive(:get).and_raise(Faraday::ResourceNotFound, faraday_err_msg)
+        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::ResourceNotFound}: #{faraday_err_msg}"
+        expect { subject.send(:get, path, params, caller_method_name) }.to raise_error(Preservation::Client::NotFoundError, exp_err_msg)
+      end
+    end
+
+    context 'when Faraday::ParsingError raised' do
+      it 'raises Preservation::Client::UnexpectedResponseError' do
+        allow(conn).to receive(:get).and_raise(Faraday::ParsingError, faraday_err_msg)
+        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::ParsingError}: #{faraday_err_msg}"
+        expect { subject.send(:get, path, params, caller_method_name) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
+      end
+    end
+
+    context 'when Faraday::RetriableResponse raised' do
+      it 'raises Preservation::Client::UnexpectedResponseError' do
+        allow(conn).to receive(:get).and_raise(Faraday::RetriableResponse, faraday_err_msg)
+        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::RetriableResponse}: #{faraday_err_msg}"
+        expect { subject.send(:get, path, params, caller_method_name) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
+      end
+    end
+  end
+
   describe '#post' do
     let(:path) { 'my_path' }
     let(:druids) { ['oo000oo0000', 'oo111oo1111'] }

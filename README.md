@@ -51,6 +51,13 @@ Note that the preservation service is behind a firewall.
 - Preservation::Client.objects.current_version('oo000oo0000')  (can also be 'druid:oo000oo0000')
 - Preservation::Client.objects.checksums(druids: druids) - will return raw csv
 - Preservation::Client.objects.checksums(druids: druids, format: 'json') - will return json
+- Preservation::Client.objects.content('oo000oo0000', 'my_file.pdf') - will return contents of my_file.pdf in most recent version of Moab object
+- Preservation::Client.objects.content('oo000oo0000', 'my_file.pdf', '1') - will return contents of my_file.pdf in version 1 of Moab object
+- Preservation::Client.objects.manifest('oo000oo0000', 'versionInventory.xml') - will return contents of versionInventory.xml in most recent version of Moab object
+- Preservation::Client.objects.manifest('oo000oo0000', 'versionInventory.xml', '3') - will return contents of versionInventory.xml in version 3 of Moab object
+- Preservation::Client.objects.metadata('oo000oo0000', 'identityMetadata.xml') - will return contents of identityMetadata.xml in most recent version of Moab object
+- Preservation::Client.objects.metadata('oo000oo0000', 'identityMetadata.xml', '8') - will return contents of identityMetadata.xml in version 8 of Moab object
+- Preservation::Client.objects.signature_catalog('oo000oo0000') - will return contents of latest version of signatureCatalog.xml from Moab object
 
 ## Development
 
