@@ -14,7 +14,7 @@ module Preservation
       attr_reader :connection, :api_version
 
       # @param path [String] path to be appended to connection url (no leading slash)
-      def get_json(path, object_id, caller_method_name)
+      def get_json(path, object_id)
         req_url = api_version.present? ? "#{api_version}/#{path}" : path
         resp = connection.get do |req|
           req.url req_url
@@ -28,7 +28,7 @@ module Preservation
           raise Preservation::Client::NotFoundError, errmsg
         else
           errmsg = ResponseErrorFormatter
-                   .format(response: resp, object_id: object_id, client_method_name: caller_method_name)
+                   .format(response: resp, object_id: object_id, client_method_name: caller_locations.first.label)
           raise Preservation::Client::UnexpectedResponseError, errmsg
         end
       rescue Faraday::ResourceNotFound => e
@@ -41,13 +41,13 @@ module Preservation
 
       # @param path [String] path to be appended to connection url (no leading slash)
       # @param params [Hash] optional params
-      def get(path, params, caller_method_name)
+      def get(path, params)
         get_path = api_version.present? ? "#{api_version}/#{path}" : path
         resp = connection.get get_path, params
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter
-                 .format(response: resp, client_method_name: caller_method_name)
+                 .format(response: resp, client_method_name: caller_locations.first.label)
         raise Preservation::Client::UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
         errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
@@ -59,13 +59,13 @@ module Preservation
 
       # @param path [String] path to be appended to connection url (no leading slash)
       # @param params [Hash] optional params
-      def post(path, params, caller_method_name)
+      def post(path, params)
         post_path = api_version.present? ? "#{api_version}/#{path}" : path
         resp = connection.post post_path, params
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter
-                 .format(response: resp, client_method_name: caller_method_name)
+                 .format(response: resp, client_method_name: caller_locations.first.label)
         raise Preservation::Client::UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
         errmsg = "HTTP POST to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
