@@ -70,10 +70,17 @@ module Preservation
         file(druid, 'metadata', filepath, version)
       end
 
-      # convenience method for retrieving latest signatureCatalog.xml file from a Moab object
+      # convenience method for retrieving latest Moab::SignatureCatalog from a Moab object,
+      #  or a newly minted Moab::SignatureCatalog if it doesn't yet exist
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
+      # @return [Moab::SignatureCatalog] the catalog of all files previously ingested
       def signature_catalog(druid)
-        manifest(druid: druid, filepath: 'signatureCatalog.xml')
+        Moab::SignatureCatalog.parse manifest(druid: druid, filepath: 'signatureCatalog.xml')
+      rescue Preservation::Client::UnexpectedResponseError => e
+        return Moab::SignatureCatalog.new(digital_object_id: druid, version_id: 0) if
+          e.message.match?('404 File Not Found')
+
+        raise
       end
 
       private

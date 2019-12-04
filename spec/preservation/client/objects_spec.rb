@@ -367,7 +367,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       it 'returns the signature catalog file' do
-        expect(subject.signature_catalog(file_druid)).to eq valid_response_body
+        expect(subject.signature_catalog(file_druid).to_xml).to eq Moab::SignatureCatalog.parse(valid_response_body).to_xml
       end
     end
 
@@ -376,7 +376,14 @@ RSpec.describe Preservation::Client::Objects do
         allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
-      it 'raises an error' do
+      it 'if 404 status, return new Moab::SignatureCatalog for druid' do
+        prescat_err_msg = "Preservation::Client.signature_catalog for #{file_druid} got 404 File Not Found (404) from Preservation ..."
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, prescat_err_msg)
+        expect(subject.signature_catalog(file_druid).to_xml).to eq Moab::SignatureCatalog.new(digital_object_id: file_druid, version_id: 0).to_xml
+      end
+
+      it 'if not 404 status, raises an error' do
+        allow(subject).to receive(:get).with(file_api_path, file_api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
         expect { subject.signature_catalog(file_druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
