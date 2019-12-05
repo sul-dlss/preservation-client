@@ -48,6 +48,108 @@ RSpec.describe Preservation::Client::Objects do
     end
   end
 
+  let(:valid_prescat_content_diff_response) do
+    <<-XML
+      <fileInventoryDifference objectId="oo000oo0000" differenceCount="2" basis="v3-contentMetadata-all" other="new-contentMetadata-all" reportDatetime="2019-12-05T19:45:43Z">
+        <fileGroupDifference groupId="content" differenceCount="2" identical="0" copyadded="0" copydeleted="0" renamed="0" modified="0" added="0" deleted="2">
+          <subset change="deleted" count="2">
+            <file change="deleted" basisPath="eric-smith-dissertation.pdf" otherPath="">
+              <fileSignature size="1000217" md5="aead2f6f734355c59af2d5b2689e4fb3" sha1="22dc6464e25dc9a7d600b1de6e3848bf63970595" sha256=""/>
+            </file>
+            <file change="deleted" basisPath="eric-smith-dissertation-augmented.pdf" otherPath="">
+              <fileSignature size="905566" md5="93802f1a639bc9215c6336ff5575ee22" sha1="32f7129a81830004f0360424525f066972865221" sha256=""/>
+            </file>
+          </subset>
+          <subset change="identical" count="0"/>
+          <subset change="copyadded" count="0"/>
+          <subset change="copydeleted" count="0"/>
+          <subset change="renamed" count="0"/>
+          <subset change="modified" count="0"/>
+          <subset change="added" count="0"/>
+        </fileGroupDifference>
+      </fileInventoryDifference>
+    XML
+  end
+
+  describe '#content_inventory_diff' do
+    let(:druid) { 'oo000oo0000' }
+    let(:path) { "objects/#{druid}/content_diff" }
+    let(:content_md) { '<contentMetadata>yer stuff here</contentMetadata>' }
+    let(:params) { { druid: druid, content_metadata: content_md } }
+    let(:api_params) { { subset: 'all', version: nil }.merge(params.reject { |k, _v| k == :druid }) }
+
+    context 'when API request succeeds' do
+      before do
+        allow(subject).to receive(:post).with(path, api_params).and_return(valid_prescat_content_diff_response)
+      end
+
+      it 'returns the API response as a Moab::FileInventoryDifference' do
+        result = subject.content_inventory_diff(params)
+        expect(result).to be_an_instance_of(Moab::FileInventoryDifference)
+        expect(result.digital_object_id).to eq 'oo000oo0000'
+        expect(result.difference_count).to eq 2
+        expect(subject).to have_received(:post).with(path, api_params)
+      end
+
+      it 'requests the API response for specified subset' do
+        params[:subset] = 'publish'
+        api_params[:subset] = 'publish'
+        subject.content_inventory_diff(params)
+        expect(subject).to have_received(:post).with(path, api_params)
+      end
+
+      it 'requests the API response for specified version' do
+        params[:version] = '3'
+        api_params[:version] = '3'
+        subject.content_inventory_diff(params)
+        expect(subject).to have_received(:post).with(path, api_params)
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:post).with(path, api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { subject.content_inventory_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
+  describe '#shelve_content_diff' do
+    let(:druid) { 'oo000oo0000' }
+    let(:path) { "objects/#{druid}/content_diff" }
+    let(:content_md) { '<contentMetadata>yer stuff here</contentMetadata>' }
+    let(:params) { { druid: druid, content_metadata: content_md } }
+    let(:api_params) { { content_metadata: content_md, subset: 'shelve', version: nil } }
+
+    context 'when API request succeeds' do
+      before do
+        allow(subject).to receive(:post).with(path, api_params).and_return(valid_prescat_content_diff_response)
+      end
+
+      it 'returns a Moab::FileGroupDifference for subset shelve' do
+        result = subject.shelve_content_diff(params)
+        expect(result).to be_an_instance_of(Moab::FileGroupDifference)
+        expect(result.group_id).to eq 'content'
+        expect(result.difference_count).to eq 2
+        expect(api_params[:subset]).to eq 'shelve'
+        expect(subject).to have_received(:post).with(path, api_params)
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:post).with(path, api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { subject.shelve_content_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
   describe '#checksums' do
     let(:path) { 'objects/checksums' }
     let(:druids) { ['oo000oo0000', 'oo111oo1111'] }
