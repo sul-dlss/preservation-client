@@ -48,16 +48,32 @@ Note that the preservation service is behind a firewall.
 
 ## API Coverage
 
+### Get the current version of a preserved object (Moab)
+
 - Preservation::Client.objects.current_version('oo000oo0000')  (can also be 'druid:oo000oo0000')
-- Preservation::Client.objects.checksums(druids: druids) - will return raw csv
-- Preservation::Client.objects.checksums(druids: druids, format: 'json') - will return json
-- Preservation::Client.objects.content(druid: 'oo000oo0000', filepath: 'my_file.pdf') - will return contents of my_file.pdf in most recent version of Moab object
-- Preservation::Client.objects.content(druid: 'oo000oo0000', filepath: 'my_file.pdf', version: '1') - will return contents of my_file.pdf in version 1 of Moab object
-- Preservation::Client.objects.manifest(druid: 'oo000oo0000', filepath: 'versionInventory.xml') - will return contents of versionInventory.xml in most recent version of Moab object
-- Preservation::Client.objects.manifest(druid: 'oo000oo0000', filepath: 'versionInventory.xml', version: '3') - will return contents of versionInventory.xml in version 3 of Moab object
-- Preservation::Client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml') - will return contents of identityMetadata.xml in most recent version of Moab object
-- Preservation::Client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8') - will return contents of identityMetadata.xml in version 8 of Moab object
-- Preservation::Client.objects.signature_catalog(druid: 'oo000oo0000') - will return contents of latest version of signatureCatalog.xml from Moab object
+
+### Retrieve file signature (checksum) information
+
+- Preservation::Client.objects.checksums(druids: druids) - returns info as raw csv
+- Preservation::Client.objects.checksums(druids: druids, format: 'json') - returns info as json
+
+### Retrieve individual files from preservation
+
+- Preservation::Client.objects.content(druid: 'oo000oo0000', filepath: 'my_file.pdf') - returns contents of my_file.pdf in most recent version of Moab object
+- Preservation::Client.objects.content(druid: 'oo000oo0000', filepath: 'my_file.pdf', version: '1') - returns contents of my_file.pdf in version 1 of Moab object
+- Preservation::Client.objects.manifest(druid: 'oo000oo0000', filepath: 'versionInventory.xml') - returns contents of versionInventory.xml in most recent version of Moab object
+- Preservation::Client.objects.manifest(druid: 'oo000oo0000', filepath: 'versionInventory.xml', version: '3') - returns contents of versionInventory.xml in version 3 of Moab object
+- Preservation::Client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml') - returns contents of identityMetadata.xml in most recent version of Moab object
+- Preservation::Client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8') - returns contents of identityMetadata.xml in version 8 of Moab object
+- Preservation::Client.objects.signature_catalog(druid: 'oo000oo0000') - returns contents of latest version of signatureCatalog.xml from Moab object
+
+### Get difference information between passed contentMetadata.xml and files in the Moab
+
+- Preservation::Client.objects.content_inventory_diff(druid: 'oo000oo0000', content_metadata: '<contentMetadata>...</contentMetadata>') - returns Moab::FileInventoryDifference containing differences between passed content metadata and latest version for subset 'all' (all|shelve|preserve|publish)
+  - you can also specify the subset and/or the version:
+    - Preservation::Client.objects.content_inventory_diff(druid: 'oo000oo0000', subset: 'publish', version: '1', content_metadata: '<contentMetadata>...</contentMetadata>')
+
+- Preservation::Client.objects.shelve_content_diff(druid: 'oo000oo0000', content_metadata: '<contentMetadata>...</contentMetadata>') - returns Moab::FileGroupDifference containing differences between passed content metadata and latest version for subset 'shelve'
 
 ## Development
 

@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'moab'
+
+# NOTE:  this class makes use of data structures from moab-versioning gem,
+#  but it does NOT directly access any preservation storage roots
 module Preservation
   class Client
     # API calls that are about Preserved Objects
@@ -9,6 +13,30 @@ module Preservation
       # @return body of HTTP response from Preservation API - the checksums and filesize for each druid
       def checksums(druids: [], resp_format: 'csv')
         post('objects/checksums', druids: druids, format: resp_format)
+      end
+
+      # @param [String] druid - with or without prefix: 'druid:bb123cd4567' OR 'bb123cd4567'
+      # @param [String] content_metadata - contentMetadata.xml to be compared against a version of Moab
+      # @param [String] subset - (default: 'all') which subset of files to compare (all|shelve|preserve|publish)
+      # @param [String] version - version of Moab to be compared against (defaults to nil for latest version)
+      # @return [Moab::FileInventoryDifference] differences of passed contentMetadata.xml
+      #   with latest (or specified) version in Moab for all files (default) or
+      #   a specified subset (shelve|preserve|publish)
+      def content_inventory_diff(druid:, content_metadata:, subset: 'all', version: nil)
+        result = post("objects/#{druid}/content_diff",
+                      content_metadata: content_metadata, subset: subset, version: version)
+        Moab::FileInventoryDifference.parse(result)
+      end
+
+      # convenience method for retrieving the differences in content files that should be "shelved" (altered in stacks)
+      #   (or nil if no such differences)
+      # @param [String] druid - with or without prefix: 'druid:bb123cd4567' OR 'bb123cd4567'
+      # @param [String] content_metadata - most recent contentMetadata.xml to be compared against latest version of Moab
+      # @return [Moab::FileGroupDifference] differences in content files that should be "shelved" (altered in stacks)
+      #   (or nil if not found)
+      def shelve_content_diff(druid:, content_metadata:)
+        inventory_diff = content_inventory_diff(druid: druid, content_metadata: content_metadata, subset: 'shelve')
+        inventory_diff.group_difference('content')
       end
 
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
