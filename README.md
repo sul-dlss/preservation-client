@@ -67,7 +67,8 @@ druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo00
 - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml')` - returns contents of identityMetadata.xml in most recent version of Moab object
   - You may specify the version:
     - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8')` - returns contents of identityMetadata.xml in version 8 of Moab object
-- `client.objects.signature_catalog(druid: 'oo000oo0000')` - returns contents of latest version of signatureCatalog.xml from Moab object
+- `client.objects.signature_catalog('oo000oo0000')` - returns latest Moab::SignatureCatalog from Moab, or new Moab::SignatureCatalog for Moab if none yet exists
+
 
 ### Get difference information between passed contentMetadata.xml and files in the Moab
 
