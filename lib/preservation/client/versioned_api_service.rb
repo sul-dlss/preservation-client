@@ -34,7 +34,7 @@ module Preservation
       rescue Faraday::ResourceNotFound => e
         errmsg = "HTTP GET to #{connection.url_prefix}#{req_url} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::NotFoundError, errmsg
-      rescue Faraday::ParsingError, Faraday::RetriableResponse => e
+      rescue Faraday::Error => e
         errmsg = "HTTP GET to #{connection.url_prefix}#{req_url} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::UnexpectedResponseError, errmsg
       end
@@ -60,15 +60,13 @@ module Preservation
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter.format(response: resp, client_method_name: caller_locations.first.label)
-        if resp.status == 404
-          raise Preservation::Client::NotFoundError, errmsg
-        else
-          raise Preservation::Client::UnexpectedResponseError, errmsg
-        end
+        raise Preservation::Client::NotFoundError, errmsg if resp.status == 404
+
+        raise Preservation::Client::UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
         errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::NotFoundError, errmsg
-      rescue Faraday::ParsingError, Faraday::RetriableResponse => e
+      rescue Faraday::Error => e
         errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::UnexpectedResponseError, errmsg
       end
