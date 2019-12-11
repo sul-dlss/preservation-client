@@ -25,6 +25,8 @@ Or install it yourself as:
 
 ## Usage
 
+Preservation::Client is a singleton object, and thus can be used as a class or an instance.
+
 ```ruby
 require 'preservation/client'
 
@@ -60,7 +62,7 @@ Note that the preservation service is behind a firewall.
 ## API Coverage
 
 - druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo000oo0000'
-- methods can be called as `client(instance).objects.method` or `Preservation::Client.objects.method`
+- methods can be called as `client_instance.objects.method` or `Preservation::Client.objects.method`
 
 ### Get the current version of a preserved object (Moab)
 
