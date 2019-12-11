@@ -39,13 +39,28 @@ def client
 end
 ```
 
+OR
+
+```ruby
+require 'preservation/client'
+
+def initialize
+  Preservation::Client.configure(url: Settings.preservation_catalog.url)
+end
+
+def do_the_thing
+  current_version_as_integer = Preservation::Client.current_version('druid:oo000oo0000')
+end
+```
+
 Note that the client may **not** be used without first having been configured, and the `url` keyword is **required**.
 
 Note that the preservation service is behind a firewall.
 
 ## API Coverage
 
-druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo000oo0000'
+- druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo000oo0000'
+- methods can be called as `client(instance).objects.method` or `Preservation::Client.objects.method`
 
 ### Get the current version of a preserved object (Moab)
 
@@ -67,8 +82,7 @@ druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo00
 - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml')` - returns contents of identityMetadata.xml in most recent version of Moab object
   - You may specify the version:
     - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8')` - returns contents of identityMetadata.xml in version 8 of Moab object
-- `client.objects.signature_catalog('oo000oo0000')` - returns latest Moab::SignatureCatalog from Moab, or new Moab::SignatureCatalog for Moab if none yet exists
-
+- `client.objects.signature_catalog('oo000oo0000')` - returns latest Moab::SignatureCatalog from Moab
 
 ### Get difference information between passed contentMetadata.xml and files in the Moab
 
