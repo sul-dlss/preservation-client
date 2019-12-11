@@ -42,36 +42,30 @@ module Preservation
       # @param path [String] path to be appended to connection url (no leading slash)
       # @param params [Hash] optional params
       def get(path, params)
-        get_path = api_version.present? ? "#{api_version}/#{path}" : path
-        resp = connection.get get_path, params
-        return resp.body if resp.success?
-
-        errmsg = ResponseErrorFormatter
-                 .format(response: resp, client_method_name: caller_locations.first.label)
-        raise Preservation::Client::UnexpectedResponseError, errmsg
-      rescue Faraday::ResourceNotFound => e
-        errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
-        raise Preservation::Client::NotFoundError, errmsg
-      rescue Faraday::ParsingError, Faraday::RetriableResponse => e
-        errmsg = "HTTP GET to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        http_response(:get, path, params)
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
       # @param params [Hash] optional params
       def post(path, params)
-        post_path = api_version.present? ? "#{api_version}/#{path}" : path
-        resp = connection.post post_path, params
+        http_response(:post, path, params)
+      end
+
+      # @param method [Symbol] :get or :post
+      # @param path [String] path to be appended to connection url (no leading slash)
+      # @param params [Hash] optional params
+      def http_response(method, path, params)
+        req_path = api_version.present? ? "#{api_version}/#{path}" : path
+        resp = connection.send(method, req_path, params)
         return resp.body if resp.success?
 
-        errmsg = ResponseErrorFormatter
-                 .format(response: resp, client_method_name: caller_locations.first.label)
+        errmsg = ResponseErrorFormatter.format(response: resp, client_method_name: caller_locations.first.label)
         raise Preservation::Client::UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
-        errmsg = "HTTP POST to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::NotFoundError, errmsg
       rescue Faraday::ParsingError, Faraday::RetriableResponse => e
-        errmsg = "HTTP POST to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::UnexpectedResponseError, errmsg
       end
     end
