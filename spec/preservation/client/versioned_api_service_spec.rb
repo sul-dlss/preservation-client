@@ -108,7 +108,14 @@ RSpec.describe Preservation::Client::VersionedApiService do
       end
     end
 
-    context 'when response status NOT success' do
+    context 'when response status 404' do
+      it 'raises Preservation::Client::NotFound with message from ResponseErrorFormatter' do
+        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 404)
+        expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
+      end
+    end
+
+    context 'when response status NOT success or 404' do
       it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 500)
         expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
@@ -165,7 +172,14 @@ RSpec.describe Preservation::Client::VersionedApiService do
       end
     end
 
-    context 'when response status NOT success' do
+    context 'when response status 404' do
+      it 'raises Preservation::Client::NotFound with message from ResponseErrorFormatter' do
+        stub_request(:post, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 404)
+        expect { subject.send(:post, path, params) }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
+      end
+    end
+
+    context 'when response status NOT success or 404' do
       it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
         stub_request(:post, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 500)
         expect { subject.send(:post, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)

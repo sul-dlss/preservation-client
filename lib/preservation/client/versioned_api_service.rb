@@ -60,7 +60,11 @@ module Preservation
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter.format(response: resp, client_method_name: caller_locations.first.label)
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        if resp.status == 404
+          raise Preservation::Client::NotFoundError, errmsg
+        else
+          raise Preservation::Client::UnexpectedResponseError, errmsg
+        end
       rescue Faraday::ResourceNotFound => e
         errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
         raise Preservation::Client::NotFoundError, errmsg
