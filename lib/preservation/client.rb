@@ -7,6 +7,7 @@ require 'faraday'
 require 'singleton'
 require 'zeitwerk'
 
+# Provides version exception to camels-case conversion
 class PreservationClientInflector < Zeitwerk::Inflector
   def camelize(basename, _abspath)
     case basename
@@ -24,6 +25,7 @@ loader.push_dir(File.absolute_path("#{__FILE__}/../.."))
 loader.setup
 
 module Preservation
+  # REST API client wrapper for PreservationCatalog with error handling
   class Client
     class Error < StandardError; end
 
