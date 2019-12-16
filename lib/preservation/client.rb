@@ -38,7 +38,7 @@ module Preservation
 
     class ConnectionFailedError < Error; end
 
-    DEFAULT_API_VERSION = '' # should be v1 once PreservationCatalog has versioned API
+    DEFAULT_API_VERSION = 'v1'
 
     include Singleton
 
