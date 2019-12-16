@@ -2,8 +2,6 @@
 
 module Preservation
   class Client
-    DEFAULT_API_VERSION = 'v1'
-
     # @abstract API calls to a versioned endpoint
     class VersionedApiService
       def initialize(connection:, api_version: DEFAULT_API_VERSION)
