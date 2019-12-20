@@ -47,6 +47,11 @@ module Preservation
       @objects ||= Objects.new(connection: connection, api_version: DEFAULT_API_VERSION)
     end
 
+    # @return [Preservation::Client::Catalog] an instance of the `Client::Catalog` class
+    def catalog
+      @catalog ||= Catalog.new(connection: connection, api_version: DEFAULT_API_VERSION)
+    end
+
     class << self
       # @param [String] url
       def configure(url:)
@@ -58,10 +63,11 @@ module Preservation
         self
       end
 
-      delegate :objects, to: :instance
+      delegate :objects, :update, to: :instance
     end
 
     attr_writer :url, :connection
+    delegate :update, to: :catalog
 
     private
 
@@ -73,8 +79,7 @@ module Preservation
       @connection ||= Faraday.new(url) do |builder|
         builder.use ErrorFaradayMiddleware
         builder.use Faraday::Request::UrlEncoded
-        builder.use Faraday::Response::RaiseError
-
+        builder.use Faraday::Response::RaiseError # raise exceptions on 40x, 50x responses
         builder.adapter Faraday.default_adapter
         builder.headers[:user_agent] = user_agent
       end
