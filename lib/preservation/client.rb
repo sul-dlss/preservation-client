@@ -73,6 +73,7 @@ module Preservation
       @connection ||= Faraday.new(url) do |builder|
         builder.use ErrorFaradayMiddleware
         builder.use Faraday::Request::UrlEncoded
+        builder.use Faraday::Response::RaiseError
 
         builder.adapter Faraday.default_adapter
         builder.headers[:user_agent] = user_agent
