@@ -94,6 +94,9 @@ Note that the preservation service is behind a firewall.
 
 - `client.objects.shelve_content_diff(druid: 'oo000oo0000', content_metadata: '<contentMetadata>...</contentMetadata>')` - returns Moab::FileGroupDifference containing differences between passed content metadata and latest version for subset 'shelve'
 
+### Alert the catalog that an object has been changed and needs to be updated
+
+- `client.update(druid: 'oo000oo0000', version: 3, size: 2342, storage_location: 'some/storage/location')` - returns true if it worked
 ## Development
 
 After checking out the repo, run `bundle` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
