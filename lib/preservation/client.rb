@@ -7,20 +7,8 @@ require 'faraday'
 require 'singleton'
 require 'zeitwerk'
 
-# Provides version exception to camels-case conversion
-class PreservationClientInflector < Zeitwerk::Inflector
-  def camelize(basename, _abspath)
-    case basename
-    when 'version'
-      'VERSION'
-    else
-      super
-    end
-  end
-end
-
 loader = Zeitwerk::Loader.new
-loader.inflector = PreservationClientInflector.new
+loader.inflector = Zeitwerk::GemInflector.new(__FILE__)
 loader.push_dir(File.absolute_path("#{__FILE__}/../.."))
 loader.setup
 
