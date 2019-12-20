@@ -71,14 +71,6 @@ RSpec.describe Preservation::Client::VersionedApiService do
         expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
       end
     end
-
-    context 'when Faraday::RetriableResponse raised' do
-      it 'raises Preservation::Client::UnexpectedResponseError' do
-        allow(conn).to receive(:get).and_raise(Faraday::RetriableResponse, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{api_version}/#{path} failed with #{Faraday::RetriableResponse}: #{faraday_err_msg}"
-        expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
-      end
-    end
   end
 
   describe '#get' do
@@ -137,14 +129,6 @@ RSpec.describe Preservation::Client::VersionedApiService do
         expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
       end
     end
-
-    context 'when Faraday::RetriableResponse raised' do
-      it 'raises Preservation::Client::UnexpectedResponseError' do
-        allow(conn).to receive(:get).and_raise(Faraday::RetriableResponse, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::RetriableResponse}: #{faraday_err_msg}"
-        expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
-      end
-    end
   end
 
   describe '#post' do
@@ -198,14 +182,6 @@ RSpec.describe Preservation::Client::VersionedApiService do
       it 'raises Preservation::Client::UnexpectedResponseError' do
         allow(conn).to receive(:post).and_raise(Faraday::ParsingError, faraday_err_msg)
         exp_err_msg = "HTTP POST to #{prez_api_url}/#{path} failed with #{Faraday::ParsingError}: #{faraday_err_msg}"
-        expect { subject.send(:post, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
-      end
-    end
-
-    context 'when Faraday::RetriableResponse raised' do
-      it 'raises Preservation::Client::UnexpectedResponseError' do
-        allow(conn).to receive(:post).and_raise(Faraday::RetriableResponse, faraday_err_msg)
-        exp_err_msg = "HTTP POST to #{prez_api_url}/#{path} failed with #{Faraday::RetriableResponse}: #{faraday_err_msg}"
         expect { subject.send(:post, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, exp_err_msg)
       end
     end
