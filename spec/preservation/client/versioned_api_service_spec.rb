@@ -44,23 +44,18 @@ RSpec.describe Preservation::Client::VersionedApiService do
       end
     end
 
-    context 'when response status NOT success' do
-      it '404 status code' do
+    context 'when response is 404' do
+      it 'raises Preservation::Client::NotFoundError' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 404)
         exp_msg = "#{druid} not found in Preservation at #{prez_api_url}/#{api_version}/#{path}"
         expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::NotFoundError, exp_msg)
       end
-      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
-        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 500)
-        expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
-      end
     end
 
-    context 'when Faraday::ResourceNotFound raised' do
-      it 'raises Preservation::Client::NotFoundError' do
-        allow(conn).to receive(:get).and_raise(Faraday::ResourceNotFound, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{api_version}/#{path} failed with #{Faraday::ResourceNotFound}: #{faraday_err_msg}"
-        expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::NotFoundError, exp_err_msg)
+    context 'when response is 301' do
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 301)
+        expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
       end
     end
   end
@@ -99,18 +94,17 @@ RSpec.describe Preservation::Client::VersionedApiService do
       end
     end
 
-    context 'when response status NOT success or 404' do
+    context 'when response status is an error' do
       it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 500)
         expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
       end
     end
 
-    context 'when Faraday::ResourceNotFound raised' do
-      it 'raises Preservation::Client::NotFoundError' do
-        allow(conn).to receive(:get).and_raise(Faraday::ResourceNotFound, faraday_err_msg)
-        exp_err_msg = "HTTP GET to #{prez_api_url}/#{path} failed with #{Faraday::ResourceNotFound}: #{faraday_err_msg}"
-        expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::NotFoundError, exp_err_msg)
+    context 'when response status is a redirect' do
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 301)
+        expect { subject.send(:get, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
       end
     end
   end
@@ -151,14 +145,6 @@ RSpec.describe Preservation::Client::VersionedApiService do
       it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
         stub_request(:post, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 500)
         expect { subject.send(:post, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
-      end
-    end
-
-    context 'when Faraday::ResourceNotFound raised' do
-      it 'raises Preservation::Client::NotFoundError' do
-        allow(conn).to receive(:post).and_raise(Faraday::ResourceNotFound, faraday_err_msg)
-        exp_err_msg = "HTTP POST to #{prez_api_url}/#{path} failed with #{Faraday::ResourceNotFound}: #{faraday_err_msg}"
-        expect { subject.send(:post, path, params) }.to raise_error(Preservation::Client::NotFoundError, exp_err_msg)
       end
     end
   end

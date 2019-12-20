@@ -23,19 +23,15 @@ module Preservation
         end
         return JSON.parse(resp.body).with_indifferent_access if resp.success?
 
-        if resp.status == 404
-          errmsg = "#{object_id} not found in Preservation at #{connection.url_prefix}#{req_url}"
-          raise Preservation::Client::NotFoundError, errmsg
-        else
-          errmsg = ResponseErrorFormatter
-                   .format(response: resp, object_id: object_id, client_method_name: caller_locations.first.label)
-          raise Preservation::Client::UnexpectedResponseError, errmsg
-        end
-      rescue Faraday::ResourceNotFound => e
-        errmsg = "HTTP GET to #{connection.url_prefix}#{req_url} failed with #{e.class}: #{e.message}"
+        errmsg = ResponseErrorFormatter
+                 .format(response: resp, object_id: object_id, client_method_name: caller_locations.first.label)
+        raise Preservation::Client::UnexpectedResponseError, errmsg
+      rescue Faraday::ResourceNotFound
+        errmsg = "#{object_id} not found in Preservation at #{connection.url_prefix}#{req_url}"
         raise Preservation::Client::NotFoundError, errmsg
       rescue Faraday::Error => e
-        errmsg = "HTTP GET to #{connection.url_prefix}#{req_url} failed with #{e.class}: #{e.message}"
+        errmsg = "Preservation::Client.#{caller_locations.first.label} for #{object_id} " \
+          "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
         raise Preservation::Client::UnexpectedResponseError, errmsg
       end
 
@@ -55,19 +51,19 @@ module Preservation
       # @param path [String] path to be appended to connection url (no leading slash)
       # @param params [Hash] optional params
       def http_response(method, path, params)
-        req_path = api_version.present? ? "#{api_version}/#{path}" : path
-        resp = connection.send(method, req_path, params)
+        req_url = api_version.present? ? "#{api_version}/#{path}" : path
+        resp = connection.send(method, req_url, params)
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter.format(response: resp, client_method_name: caller_locations.first.label)
-        raise Preservation::Client::NotFoundError, errmsg if resp.status == 404
-
         raise Preservation::Client::UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
-        errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "Preservation::Client.#{caller_locations.first.label} " \
+          "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
         raise Preservation::Client::NotFoundError, errmsg
       rescue Faraday::Error => e
-        errmsg = "HTTP #{method.to_s.upcase} to #{connection.url_prefix}#{path} failed with #{e.class}: #{e.message}"
+        errmsg = "Preservation::Client.#{caller_locations.first.label} " \
+          "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
         raise Preservation::Client::UnexpectedResponseError, errmsg
       end
     end
