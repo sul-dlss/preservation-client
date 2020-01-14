@@ -33,7 +33,7 @@ module Preservation
         end
 
         true
-      rescue Faraday::ClientError => e
+      rescue Faraday::Error => e
         raise UnexpectedResponseError, e
       end
     end
