@@ -2,9 +2,10 @@
 
 RSpec.describe Preservation::Client::Catalog do
   let(:prez_api_url) { 'https://prezcat.example.com' }
+  let(:auth_token) { 'my_secret_jwt_value' }
 
   before do
-    Preservation::Client.configure(url: prez_api_url)
+    Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
 
   let(:conn) { Preservation::Client.instance.send(:connection) }
