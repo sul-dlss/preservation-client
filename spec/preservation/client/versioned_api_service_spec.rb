@@ -2,11 +2,12 @@
 
 RSpec.describe Preservation::Client::VersionedApiService do
   let(:prez_api_url) { 'https://prezcat.example.com' }
+  let(:auth_token) { 'my_secret_jwt_value' }
   let(:druid) { 'oo000oo0000' }
   let(:faraday_err_msg) { 'faraday is sad' }
 
   before do
-    Preservation::Client.configure(url: prez_api_url)
+    Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
 
   let(:conn) { Preservation::Client.instance.send(:connection) }

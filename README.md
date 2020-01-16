@@ -37,7 +37,7 @@ end
 private
 
 def client
-  @client ||= Preservation::Client.configure(url: Settings.preservation_catalog.url)
+  @client ||= Preservation::Client.configure(url: Settings.preservation_catalog.url, token: Settings.preservation_catalog.token)
 end
 ```
 
@@ -47,7 +47,7 @@ OR
 require 'preservation/client'
 
 def initialize
-  Preservation::Client.configure(url: Settings.preservation_catalog.url)
+  Preservation::Client.configure(url: Settings.preservation_catalog.url, token: Settings.preservation_catalog.token)
 end
 
 def do_the_thing
@@ -55,7 +55,9 @@ def do_the_thing
 end
 ```
 
-Note that the client may **not** be used without first having been configured, and the `url` keyword is **required**.
+Note that the client may **not** be used without first having been configured, and both the `url` and `token` keywords are **required**.
+
+See https://github.com/sul-dlss/preservation_catalog#api for info on obtaining a valid API token.
 
 Note that the preservation service is behind a firewall.
 

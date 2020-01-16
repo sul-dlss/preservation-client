@@ -27,6 +27,7 @@ module Preservation
     class ConnectionFailedError < Error; end
 
     DEFAULT_API_VERSION = 'v1'
+    TOKEN_HEADER = 'Authorization'
 
     include Singleton
 
@@ -42,8 +43,10 @@ module Preservation
 
     class << self
       # @param [String] url
-      def configure(url:)
+      # @param [String] token a bearer token for HTTP authentication
+      def configure(url:, token:)
         instance.url = url
+        instance.token = token
 
         # Force connection to be re-established when `.configure` is called
         instance.connection = nil
@@ -54,13 +57,17 @@ module Preservation
       delegate :objects, :update, to: :instance
     end
 
-    attr_writer :url, :connection
+    attr_writer :url, :connection, :token
     delegate :update, to: :catalog
 
     private
 
     def url
       @url || raise(Error, 'url has not yet been configured')
+    end
+
+    def token
+      @token || raise(Error, 'auth token has not been configured')
     end
 
     def connection
@@ -70,6 +77,7 @@ module Preservation
         builder.use Faraday::Response::RaiseError # raise exceptions on 40x, 50x responses
         builder.adapter Faraday.default_adapter
         builder.headers[:user_agent] = user_agent
+        builder.headers[TOKEN_HEADER] = "Bearer #{token}"
       end
     end
 
