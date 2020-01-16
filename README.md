@@ -37,7 +37,7 @@ end
 private
 
 def client
-  @client ||= Preservation::Client.configure(url: Settings.preservation_catalog.url, token: Settings.preservation_catalog.auth_token)
+  @client ||= Preservation::Client.configure(url: Settings.preservation_catalog.url, token: Settings.preservation_catalog.token)
 end
 ```
 
@@ -47,7 +47,7 @@ OR
 require 'preservation/client'
 
 def initialize
-  Preservation::Client.configure(url: Settings.preservation_catalog.url, token: Settings.preservation_catalog.auth_token)
+  Preservation::Client.configure(url: Settings.preservation_catalog.url, token: Settings.preservation_catalog.token)
 end
 
 def do_the_thing
