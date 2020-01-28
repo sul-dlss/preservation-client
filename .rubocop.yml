@@ -24,6 +24,5 @@ Style/Documentation:
   Exclude:
     - 'spec/**/*'
 
-
 Style/WordArray:
   Enabled: false
