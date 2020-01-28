@@ -125,6 +125,13 @@ RSpec.describe Preservation::Client::VersionedApiService do
       stub_request(:post, "#{prez_api_url}/#{path}").to_return(body: 'blank api version', status: 200)
       expect(pc.send(:post, path, params)).to eq 'blank api version'
     end
+    it 'request sends params in body and content-type in header' do
+      pc = described_class.new(connection: conn, api_version: '')
+      stub_request(:post, "#{prez_api_url}/#{path}")
+        .with(body: params.to_json, headers: { 'Content-Type' => 'application/json' })
+        .to_return(body: 'blank api version', status: 200)
+      expect(pc.send(:post, path, params)).to eq 'blank api version'
+    end
 
     context 'when response status success' do
       let(:resp_body) { JSON.generate(foo: 'bar') }
