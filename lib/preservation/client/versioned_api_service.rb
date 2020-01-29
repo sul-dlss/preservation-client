@@ -52,7 +52,14 @@ module Preservation
       # @param params [Hash] optional params
       def http_response(method, path, params)
         req_url = api_version.present? ? "#{api_version}/#{path}" : path
-        resp = connection.send(method, req_url, params)
+        resp =
+          case method
+          when :get
+            connection.get(req_url, params)
+          when :post
+            request_json = params.to_json if params&.any?
+            connection.post(req_url, request_json, 'Content-Type' => 'application/json')
+          end
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter.format(response: resp, client_method_name: caller_locations.first.label)
