@@ -15,7 +15,7 @@ module Preservation
 
       # @param path [String] path to be appended to connection url (no leading slash)
       def get_json(path, object_id)
-        req_url = api_version.present? ? "#{api_version}/#{path}" : path
+        req_url = "#{api_version}/#{path}"
         resp = connection.get do |req|
           req.url req_url
           req.headers['Content-Type'] = 'application/json'
@@ -69,7 +69,7 @@ module Preservation
       # @param path [String] path to be appended to connection url (no leading slash)
       # @param params [Hash] optional params
       def http_response(method, path, params)
-        req_url = api_version.present? ? "#{api_version}/#{path}" : path
+        req_url = "#{api_version}/#{path}"
         resp =
           case method
           when :delete, :get
