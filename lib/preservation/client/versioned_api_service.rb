@@ -36,38 +36,43 @@ module Preservation
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
-      # @param params [Hash] optional params
-      def get(path, params)
-        http_response(:get, path, params)
+      # @param params [Hash] optional request parameters
+      # @param on_data [Proc] a callback to use when a streaming response is desired.
+      def get(path, params, on_data:)
+        return http_response(:get, path, params) unless on_data
+
+        connection.get("#{api_version}/#{path}", params) do |req|
+          req.options.on_data = on_data
+        end
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
-      # @param params [Hash] optional params
+      # @param params [Hash] optional request parameters
       def post(path, params)
         http_response(:post, path, params)
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
-      # @param params [Hash] optional params
+      # @param params [Hash] optional request parameters
       def patch(path, params)
         http_response(:patch, path, params)
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
-      # @param params [Hash] optional params
+      # @param params [Hash] optional request parameters
       def put(path, params)
         http_response(:put, path, params)
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
-      # @param params [Hash] optional params
+      # @param params [Hash] optional request parameters
       def delete(path, params)
         http_response(:delete, path, params)
       end
 
       # @param method [Symbol] a symbol representing an HTTP method: :get, :post, :patch, :put, :delete
       # @param path [String] path to be appended to connection url (no leading slash)
-      # @param params [Hash] optional params
+      # @param params [Hash] optional request parameters
       def http_response(method, path, params)
         req_url = "#{api_version}/#{path}"
         resp =

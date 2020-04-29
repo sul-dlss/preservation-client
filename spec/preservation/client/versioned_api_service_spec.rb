@@ -6,7 +6,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
   let(:druid) { 'oo000oo0000' }
   let(:faraday_err_msg) { 'faraday is sad' }
   let(:prez_api_url) { 'https://prezcat.example.com' }
-  let(:subject) { described_class.new(connection: conn, api_version: 'v6') }
+  subject(:service) { described_class.new(connection: conn, api_version: 'v6') }
 
   before do
     Preservation::Client.configure(url: prez_api_url, token: auth_token)
@@ -62,56 +62,94 @@ RSpec.describe Preservation::Client::VersionedApiService do
     end
   end
 
-  describe 'HTTP actions without bodies' do
-    %i[delete get].each do |method|
-      describe "##{method}" do
-        let(:api_version) { subject.send(:api_version) }
-        let(:params) { { foo: 'bar' } }
-        let(:params_as_args) { 'foo=bar' }
-        let(:path) { 'my_path' }
+  describe '#delete' do
+    let(:status) { 200 }
+    let(:resp_body) { nil }
+    subject(:delete) { service.send(:delete, 'my_path', foo: 'bar') }
 
-        it 'request url includes api_version when it is non-blank' do
-          stub_request(method, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}")
-            .to_return(body: 'have api version', status: 200)
-          expect(subject.send(method, path, params)).to eq 'have api version'
-        end
+    before do
+      stub_request(:delete, 'https://prezcat.example.com/v6/my_path?foo=bar').to_return(status: status, body: resp_body)
+    end
 
-        it 'request url has no api_version when it is blank' do
-          pc = described_class.new(connection: conn, api_version: '')
-          stub_request(method, "#{prez_api_url}/#{path}?#{params_as_args}").to_return(body: 'blank api version', status: 200)
-          expect(pc.send(method, path, params)).to eq 'blank api version'
-        end
+    context 'when it is successful' do
+      let(:resp_body) { "I'm a little teacup" }
 
-        context 'when response status success' do
-          let(:resp_body) { "I'm a little teacup" }
+      it { is_expected.to eq resp_body }
+    end
 
-          it 'returns response body' do
-            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}")
-              .to_return(body: resp_body, status: 200)
-            expect(subject.send(method, path, params)).to eq resp_body
-          end
-        end
+    context 'when response status 404' do
+      let(:status) { 404 }
 
-        context 'when response status 404' do
-          it 'raises Preservation::Client::NotFound with message from ResponseErrorFormatter' do
-            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 404)
-            expect { subject.send(method, path, params) }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
-          end
-        end
+      it 'raises Preservation::Client::NotFound with message from ResponseErrorFormatter' do
+        expect { delete }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
+      end
+    end
 
-        context 'when response status is an error' do
-          it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
-            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 500)
-            expect { subject.send(method, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
-          end
-        end
+    context 'when response status is an error' do
+      let(:status) { 500 }
 
-        context 'when response status is a redirect' do
-          it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
-            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}?#{params_as_args}").to_return(status: 301)
-            expect { subject.send(method, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
-          end
-        end
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        expect { delete }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
+      end
+    end
+
+    context 'when response status is a redirect' do
+      let(:status) { 301 }
+
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        expect { delete }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
+      end
+    end
+  end
+
+  describe '#get' do
+    let(:status) { 200 }
+    let(:resp_body) { nil }
+    subject(:get) { service.send(:get, 'my_path', { foo: 'bar' }, on_data: nil) }
+
+    before do
+      stub_request(:get, 'https://prezcat.example.com/v6/my_path?foo=bar').to_return(status: status, body: resp_body)
+    end
+
+    context 'when it is successful' do
+      let(:resp_body) { "I'm a little teacup" }
+
+      it { is_expected.to eq resp_body }
+    end
+
+    context 'when response status 404' do
+      let(:status) { 404 }
+
+      it 'raises Preservation::Client::NotFound with message from ResponseErrorFormatter' do
+        expect { get }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
+      end
+    end
+
+    context 'when response status is an error' do
+      let(:status) { 500 }
+
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        expect { get }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
+      end
+    end
+
+    context 'when response status is a redirect' do
+      let(:status) { 301 }
+
+      it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        expect { get }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
+      end
+    end
+
+    context 'when streaming' do
+      subject(:get) { service.send(:get, 'my_path', { foo: 'bar' }, on_data: callback) }
+      let(:callback) { proc { |data, _count| buffer << data } }
+      let(:buffer) { [] }
+      let(:resp_body) { "I'm a little teacup" }
+
+      it 'streams' do
+        get
+        expect(buffer).to eq ["I'm a little teacup"]
       end
     end
   end
