@@ -50,8 +50,9 @@ module Preservation
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
       # @param [String] filepath - the path of the file relative to the moab content directory
       # @param [String] version - the version of the file requested (defaults to nil for latest version)
-      def content(druid:, filepath:, version: nil)
-        file(druid, 'content', filepath, version)
+      # @param [Proc] on_data a block, if provided is called to do streaming responses
+      def content(druid:, filepath:, version: nil, on_data: nil)
+        file(druid, 'content', filepath, version, on_data: on_data)
       end
 
       # retrieve a manifest file from a Moab object
@@ -83,10 +84,11 @@ module Preservation
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
       # @param [String] category - one of 'manifest', 'metadata' or 'content'
       # @param [String] filepath - the path of the file relative to the moab category directory
-      # @param [String] version - the version of the file requested (defaults to nil for latest version)
+      # @param [String] version - the version of the file requested
+      # @param [Proc] on_data a block, if provided is called to do streaming responses
       # @return the retrieved file
-      def file(druid, category, filepath, version = nil)
-        get("objects/#{druid}/file", category: category, filepath: filepath, version: version)
+      def file(druid, category, filepath, version, on_data: nil)
+        get("objects/#{druid}/file", { category: category, filepath: filepath, version: version }, on_data: on_data)
       end
     end
   end
