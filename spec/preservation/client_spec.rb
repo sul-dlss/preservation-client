@@ -41,13 +41,13 @@ RSpec.describe Preservation::Client do
       expect(client.instance.send(:token)).to eq auth_token
     end
     it 'raises error if no url or token provided' do
-      expect { described_class.configure }.to raise_error(ArgumentError, /missing keywords: (:?)url, (:?)token/) # /(missing keywords:) url, token/)
+      expect { described_class.configure }.to raise_error(ArgumentError, /missing keywords: :?url, :?token/)
     end
     it 'raises error if no url provided' do
-      expect { described_class.configure(token: auth_token) }.to raise_error(ArgumentError, /missing keyword: (:?)url/)
+      expect { described_class.configure(token: auth_token) }.to raise_error(ArgumentError, /missing keyword: :?url/)
     end
     it 'raises error if no token provided' do
-      expect { described_class.configure(url: prez_url) }.to raise_error(ArgumentError, /missing keyword: (:?)token/)
+      expect { described_class.configure(url: prez_url) }.to raise_error(ArgumentError, /missing keyword: :?token/)
     end
     it 'connection is populated' do
       connection = client.instance.send(:connection)
