@@ -6,8 +6,11 @@ rvm:
   - 2.7.1
 
 env:
-  - "RAILS_VERSION=5.2.3"
-  - "RAILS_VERSION=6.0.0"
+  jobs:
+    - RAILS_VERSION=5.2.3
+    - RAILS_VERSION=6.0.0
+  global:
+    - CC_TEST_REPORTER_ID=02e8afad8d0b699828dd69b6f45b598e7317b2d9828ea23380c3a97113068a0c
 
 before_install: gem install bundler -v 2.1.2
 
