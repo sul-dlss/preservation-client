@@ -323,6 +323,32 @@ RSpec.describe Preservation::Client::Objects do
     end
   end
 
+  describe '#primary_moab_location' do
+    let(:druid) { 'oo000oo0000' }
+
+    context 'when API request succeeds' do
+      let(:storage_location) { 'a/generic/storage_root/sdr2objects' }
+
+      before do
+        allow(subject).to receive(:get).and_return(storage_location)
+      end
+
+      it 'returns the path to the primary moab storage location' do
+        expect(subject.primary_moab_location(druid: druid)).to eq storage_location
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(subject).to receive(:get).and_raise(Preservation::Client::NotFoundError)
+      end
+
+      it 'raises an error' do
+        expect { subject.primary_moab_location(druid: druid) }.to raise_error(Preservation::Client::NotFoundError)
+      end
+    end
+  end
+
   describe '#signature_catalog' do
     let(:file_api_params) do
       {
