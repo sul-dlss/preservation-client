@@ -74,6 +74,7 @@ module Preservation
       # retrieve the storage location for the primary moab of the given druid
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' or 'ab123cd4567'
       # @return [String] the storage location of the primary moab for the given druid
+      # @raise [Preservation::Client::NotFoundError] when druid is not found
       def primary_moab_location(druid:)
         get("objects/#{druid}/primary_moab_location", {}, on_data: nil)
       end
