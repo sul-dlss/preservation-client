@@ -88,6 +88,10 @@ Note that the preservation service is behind a firewall.
     - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8')` - returns contents of identityMetadata.xml in version 8 of Moab object
 - `client.objects.signature_catalog('oo000oo0000')` - returns latest Moab::SignatureCatalog from Moab
 
+### Retrieve the primary moab storage location
+
+- `client.objects.primary_moab_location(druid: 'ooo000oo0000')` - returns the path to the storage location for the primary moab
+
 ### Get difference information between passed contentMetadata.xml and files in the Moab
 
 - `client.objects.content_inventory_diff(druid: 'oo000oo0000', content_metadata: '<contentMetadata>...</contentMetadata>')` - returns Moab::FileInventoryDifference containing differences between passed content metadata and latest version for subset 'all'
