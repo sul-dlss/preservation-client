@@ -17,13 +17,18 @@ module Preservation
   class Client
     class Error < StandardError; end
 
-    # Error that is raised when the remote server returns a 404 Not Found
+    # Error raised when server returns 404 Not Found
     class NotFoundError < Error; end
 
-    # Error that is raised when the remote server returns some unexpected response
-    # e.g. 4xx or 5xx status
+    # Error raised when server returns 423 Locked
+    class LockedError < Error; end
+
+    # Error raised when server returns an unexpected response
+    # e.g., 4xx or 5xx status not otherwise handled
     class UnexpectedResponseError < Error; end
 
+    # Error raised when Faraday gem fails to connect, e.g., on SSL errors or
+    # timeouts
     class ConnectionFailedError < Error; end
 
     DEFAULT_API_VERSION = 'v1'
