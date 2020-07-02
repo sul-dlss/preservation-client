@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 RSpec.describe Preservation::Client::Objects do
+  subject(:client) { described_class.new(connection: connection, api_version: '') }
+
+  let(:connection) { Preservation::Client.instance.send(:connection) }
   let(:prez_api_url) { 'https://prezcat.example.com' }
   let(:auth_token) { 'my_secret_jwt_value' }
+  let(:err_msg) { 'Mistakes were made.' }
 
   before do
     Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
-
-  let(:conn) { Preservation::Client.instance.send(:connection) }
-  let(:subject) { described_class.new(connection: conn, api_version: '') }
-  let(:err_msg) { 'Mistakes were made.' }
 
   describe '#current_version' do
     let(:path) { "objects/#{druid}.json" }
@@ -30,21 +30,21 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get_json).with(path, druid).and_return(valid_response_body)
+        allow(client).to receive(:get_json).with(path, druid).and_return(valid_response_body)
       end
 
       it 'returns the current version as an integer' do
-        expect(subject.current_version(druid)).to eq result_version
+        expect(client.current_version(druid)).to eq result_version
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get_json).with(path, druid).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:get_json).with(path, druid).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.current_version(druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.current_version(druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -81,39 +81,39 @@ RSpec.describe Preservation::Client::Objects do
 
     context 'when API request succeeds' do
       before do
-        allow(subject).to receive(:post).with(path, api_params).and_return(valid_prescat_content_diff_response)
+        allow(client).to receive(:post).with(path, api_params).and_return(valid_prescat_content_diff_response)
       end
 
       it 'returns the API response as a Moab::FileInventoryDifference' do
-        result = subject.content_inventory_diff(params)
+        result = client.content_inventory_diff(params)
         expect(result).to be_an_instance_of(Moab::FileInventoryDifference)
         expect(result.digital_object_id).to eq 'oo000oo0000'
         expect(result.difference_count).to eq 2
-        expect(subject).to have_received(:post).with(path, api_params)
+        expect(client).to have_received(:post).with(path, api_params)
       end
 
       it 'requests the API response for specified subset' do
         params[:subset] = 'publish'
         api_params[:subset] = 'publish'
-        subject.content_inventory_diff(params)
-        expect(subject).to have_received(:post).with(path, api_params)
+        client.content_inventory_diff(params)
+        expect(client).to have_received(:post).with(path, api_params)
       end
 
       it 'requests the API response for specified version' do
         params[:version] = '3'
         api_params[:version] = '3'
-        subject.content_inventory_diff(params)
-        expect(subject).to have_received(:post).with(path, api_params)
+        client.content_inventory_diff(params)
+        expect(client).to have_received(:post).with(path, api_params)
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:post).with(path, api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:post).with(path, api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.content_inventory_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.content_inventory_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -127,26 +127,26 @@ RSpec.describe Preservation::Client::Objects do
 
     context 'when API request succeeds' do
       before do
-        allow(subject).to receive(:post).with(path, api_params).and_return(valid_prescat_content_diff_response)
+        allow(client).to receive(:post).with(path, api_params).and_return(valid_prescat_content_diff_response)
       end
 
       it 'returns a Moab::FileGroupDifference for subset shelve' do
-        result = subject.shelve_content_diff(params)
+        result = client.shelve_content_diff(params)
         expect(result).to be_an_instance_of(Moab::FileGroupDifference)
         expect(result.group_id).to eq 'content'
         expect(result.difference_count).to eq 2
         expect(api_params[:subset]).to eq 'shelve'
-        expect(subject).to have_received(:post).with(path, api_params)
+        expect(client).to have_received(:post).with(path, api_params)
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:post).with(path, api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:post).with(path, api_params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.shelve_content_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.shelve_content_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -167,21 +167,21 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:post).with(path, params).and_return(valid_csv_response)
+        allow(client).to receive(:post).with(path, params).and_return(valid_csv_response)
       end
 
       it 'returns the API response' do
-        expect(subject.checksums(druids: druids)).to eq valid_csv_response
+        expect(client.checksums(druids: druids)).to eq valid_csv_response
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:post).with(path, params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:post).with(path, params).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.checksums(druids: druids) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.checksums(druids: druids) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -206,26 +206,26 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).and_return(valid_response_body)
+        allow(client).to receive(:get).and_return(valid_response_body)
       end
 
       it 'returns the content file' do
-        expect(subject.content(druid: file_druid, filepath: filename)).to eq valid_response_body
+        expect(client.content(druid: file_druid, filepath: filename)).to eq valid_response_body
       end
 
       it 'returns the content file for specified version' do
-        allow(subject).to receive(:get).and_return(valid_response_body)
-        expect(subject.content(druid: file_druid, filepath: filename, version: '6')).to eq valid_response_body
+        allow(client).to receive(:get).and_return(valid_response_body)
+        expect(client.content(druid: file_druid, filepath: filename, version: '6')).to eq valid_response_body
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.content(druid: file_druid, filepath: filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.content(druid: file_druid, filepath: filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -252,25 +252,25 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).and_return(valid_response_body)
+        allow(client).to receive(:get).and_return(valid_response_body)
       end
 
       it 'returns the manifest file' do
-        expect(subject.manifest(druid: file_druid, filepath: manifest_filename)).to eq valid_response_body
+        expect(client.manifest(druid: file_druid, filepath: manifest_filename)).to eq valid_response_body
       end
 
       it 'returns the manifest file for specified version' do
-        expect(subject.manifest(druid: file_druid, filepath: manifest_filename, version: '6')).to eq valid_response_body
+        expect(client.manifest(druid: file_druid, filepath: manifest_filename, version: '6')).to eq valid_response_body
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.manifest(druid: file_druid, filepath: manifest_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.manifest(druid: file_druid, filepath: manifest_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -299,52 +299,56 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).and_return(valid_response_body)
+        allow(client).to receive(:get).and_return(valid_response_body)
       end
 
       it 'returns the metadata file' do
-        expect(subject.metadata(druid: file_druid, filepath: metadata_filename)).to eq valid_response_body
+        expect(client.metadata(druid: file_druid, filepath: metadata_filename)).to eq valid_response_body
       end
 
       it 'returns the metadata file for specified version' do
-        allow(subject).to receive(:get).and_return(valid_response_body)
-        expect(subject.metadata(druid: file_druid, filepath: metadata_filename, version: '6')).to eq valid_response_body
+        allow(client).to receive(:get).and_return(valid_response_body)
+        expect(client.metadata(druid: file_druid, filepath: metadata_filename, version: '6')).to eq valid_response_body
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'raises an error' do
-        expect { subject.metadata(druid: file_druid, filepath: metadata_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.metadata(druid: file_druid, filepath: metadata_filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
 
   describe '#primary_moab_location' do
+    subject(:request) { client.primary_moab_location(druid: druid) }
+
     let(:druid) { 'oo000oo0000' }
+    let(:locked_message) { "Cannot retrieve primary moab location because versioning is locked for the preserved object with id #{druid}" }
+    let(:storage_location) { 'a/generic/storage_root/sdr2objects' }
 
     context 'when API request succeeds' do
-      let(:storage_location) { 'a/generic/storage_root/sdr2objects' }
-
       before do
-        allow(subject).to receive(:get).and_return(storage_location)
+        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/primary_moab_location")
+          .to_return(status: 200, body: storage_location, headers: {})
       end
 
       it 'returns the path to the primary moab storage location' do
-        expect(subject.primary_moab_location(druid: druid)).to eq storage_location
+        expect(request).to eq storage_location
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).and_raise(Preservation::Client::NotFoundError)
+        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/primary_moab_location")
+          .to_return(status: 423, body: locked_message, headers: {})
       end
 
       it 'raises an error' do
-        expect { subject.primary_moab_location(druid: druid) }.to raise_error(Preservation::Client::NotFoundError)
+        expect { request }.to raise_error(Preservation::Client::LockedError)
       end
     end
   end
@@ -371,28 +375,28 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       before do
-        allow(subject).to receive(:get).and_return(valid_response_body)
+        allow(client).to receive(:get).and_return(valid_response_body)
       end
 
       it 'returns the signature catalog file' do
-        expect(subject.signature_catalog(file_druid).to_xml).to eq Moab::SignatureCatalog.parse(valid_response_body).to_xml
+        expect(client.signature_catalog(file_druid).to_xml).to eq Moab::SignatureCatalog.parse(valid_response_body).to_xml
       end
     end
 
     context 'when API request fails' do
       before do
-        allow(subject).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
       end
 
       it 'if 404 status, raise NotFoundError' do
         errmsg_not_found = "Preservation::Client.signature_catalog for #{file_druid} got 404 File Not Found (404) from Preservation ..."
-        allow(subject).to receive(:get).and_raise(Preservation::Client::NotFoundError, errmsg_not_found)
-        expect { subject.signature_catalog(file_druid) }.to raise_error(Preservation::Client::NotFoundError, errmsg_not_found)
+        allow(client).to receive(:get).and_raise(Preservation::Client::NotFoundError, errmsg_not_found)
+        expect { client.signature_catalog(file_druid) }.to raise_error(Preservation::Client::NotFoundError, errmsg_not_found)
       end
 
       it 'if not 404 status, raise UnexpectedResponseError' do
-        allow(subject).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
-        expect { subject.signature_catalog(file_druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        allow(client).to receive(:get).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.signature_catalog(file_druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end

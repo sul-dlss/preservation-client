@@ -25,14 +25,14 @@ module Preservation
 
         errmsg = ResponseErrorFormatter
                  .format(response: resp, object_id: object_id, client_method_name: caller_locations.first.label)
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        raise UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound
         errmsg = "#{object_id} not found in Preservation at #{connection.url_prefix}#{req_url}"
-        raise Preservation::Client::NotFoundError, errmsg
+        raise NotFoundError, errmsg
       rescue Faraday::Error => e
         errmsg = "Preservation::Client.#{caller_locations.first.label} for #{object_id} " \
           "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        raise UnexpectedResponseError, errmsg
       end
 
       # @param path [String] path to be appended to connection url (no leading slash)
@@ -83,18 +83,20 @@ module Preservation
             request_json = params.to_json if params&.any?
             connection.public_send(method, req_url, request_json, 'Content-Type' => 'application/json')
           end
+
         return resp.body if resp.success?
 
         errmsg = ResponseErrorFormatter.format(response: resp, client_method_name: caller_locations.first.label)
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        raise UnexpectedResponseError, errmsg
       rescue Faraday::ResourceNotFound => e
         errmsg = "Preservation::Client.#{caller_locations.first.label} " \
           "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
-        raise Preservation::Client::NotFoundError, errmsg
+        raise NotFoundError, errmsg
       rescue Faraday::Error => e
         errmsg = "Preservation::Client.#{caller_locations.first.label} " \
           "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
-        raise Preservation::Client::UnexpectedResponseError, errmsg
+        exception_class = e.response[:status] == 423 ? LockedError : UnexpectedResponseError
+        raise exception_class, errmsg
       end
     end
   end
