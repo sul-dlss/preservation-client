@@ -92,6 +92,10 @@ Note that the preservation service is behind a firewall.
 
 - `client.objects.primary_moab_location(druid: 'ooo000oo0000')` - returns the path to the storage location for the primary moab
 
+### Validate the Moab
+
+- `client.objects.validate_moab(druid: 'ooo000oo0000')` - validates that the Moab object, used by preservationWF to ensure we have a valid Moab before replicating to various preservation endpoints
+
 ### Get difference information between passed contentMetadata.xml and files in the Moab
 
 - `client.objects.content_inventory_diff(druid: 'oo000oo0000', content_metadata: '<contentMetadata>...</contentMetadata>')` - returns Moab::FileInventoryDifference containing differences between passed content metadata and latest version for subset 'all'
