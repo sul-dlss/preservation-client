@@ -71,6 +71,15 @@ module Preservation
         file(druid, 'metadata', filepath, version)
       end
 
+      # calls the endpoint to queue a ValidateMoab job for a specific druid
+      # typically called by a preservationIngestWF robot
+      # @param [String] druid - with or without prefix: 'druid:ab123cd4567' or 'ab123cd4567'
+      # @return [String] "ok" when job queued
+      # @raise [Preservation::Client::NotFoundError] when druid is not found
+      def validate_moab(druid:)
+        get("objects/#{druid}/validate_moab", {}, on_data: nil)
+      end
+
       # retrieve the storage location for the primary moab of the given druid
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' or 'ab123cd4567'
       # @return [String] the storage location of the primary moab for the given druid
