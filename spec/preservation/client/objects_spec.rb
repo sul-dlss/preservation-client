@@ -323,6 +323,34 @@ RSpec.describe Preservation::Client::Objects do
     end
   end
 
+  describe '#validate_moab' do
+    subject(:request) { client.validate_moab(druid: druid) }
+
+    let(:druid) { 'oo000oo0000' }
+
+    context 'when API request succeeds' do
+      before do
+        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/validate_moab")
+          .to_return(status: 200, body: 'ok', headers: {})
+      end
+
+      it 'returns ok' do
+        expect(request).to eq 'ok'
+      end
+    end
+
+    context 'when API request fails with object not found' do
+      before do
+        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/validate_moab")
+          .to_return(status: 404, headers: {})
+      end
+
+      it 'raises an error' do
+        expect { request }.to raise_error(Preservation::Client::NotFoundError)
+      end
+    end
+  end
+
   describe '#primary_moab_location' do
     subject(:request) { client.primary_moab_location(druid: druid) }
 
