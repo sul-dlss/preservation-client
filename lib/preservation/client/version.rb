@@ -2,6 +2,6 @@
 
 module Preservation
   class Client
-    VERSION = '3.4.0'
+    VERSION = '3.5.0'
   end
 end
