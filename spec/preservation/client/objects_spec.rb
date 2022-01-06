@@ -85,7 +85,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       it 'returns the API response as a Moab::FileInventoryDifference' do
-        result = client.content_inventory_diff(params)
+        result = client.content_inventory_diff(**params)
         expect(result).to be_an_instance_of(Moab::FileInventoryDifference)
         expect(result.digital_object_id).to eq 'oo000oo0000'
         expect(result.difference_count).to eq 2
@@ -95,14 +95,14 @@ RSpec.describe Preservation::Client::Objects do
       it 'requests the API response for specified subset' do
         params[:subset] = 'publish'
         api_params[:subset] = 'publish'
-        client.content_inventory_diff(params)
+        client.content_inventory_diff(**params)
         expect(client).to have_received(:post).with(path, api_params)
       end
 
       it 'requests the API response for specified version' do
         params[:version] = '3'
         api_params[:version] = '3'
-        client.content_inventory_diff(params)
+        client.content_inventory_diff(**params)
         expect(client).to have_received(:post).with(path, api_params)
       end
     end
@@ -113,7 +113,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       it 'raises an error' do
-        expect { client.content_inventory_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.content_inventory_diff(**params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
@@ -131,7 +131,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       it 'returns a Moab::FileGroupDifference for subset shelve' do
-        result = client.shelve_content_diff(params)
+        result = client.shelve_content_diff(**params)
         expect(result).to be_an_instance_of(Moab::FileGroupDifference)
         expect(result.group_id).to eq 'content'
         expect(result.difference_count).to eq 2
@@ -146,7 +146,7 @@ RSpec.describe Preservation::Client::Objects do
       end
 
       it 'raises an error' do
-        expect { client.shelve_content_diff(params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+        expect { client.shelve_content_diff(**params) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
       end
     end
   end
