@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
 RSpec.describe Preservation::Client::VersionedApiService do
+  subject(:service) { described_class.new(connection: conn, api_version: 'v6') }
+
   let(:auth_token) { 'my_secret_jwt_value' }
   let(:conn) { Preservation::Client.instance.send(:connection) }
   let(:druid) { 'oo000oo0000' }
   let(:faraday_err_msg) { 'faraday is sad' }
   let(:prez_api_url) { 'https://prezcat.example.com' }
-  subject(:service) { described_class.new(connection: conn, api_version: 'v6') }
 
   before do
     Preservation::Client.configure(url: prez_api_url, token: auth_token)
@@ -63,9 +64,10 @@ RSpec.describe Preservation::Client::VersionedApiService do
   end
 
   describe '#delete' do
+    subject(:delete) { service.send(:delete, 'my_path', foo: 'bar') }
+
     let(:status) { 200 }
     let(:resp_body) { nil }
-    subject(:delete) { service.send(:delete, 'my_path', foo: 'bar') }
 
     before do
       stub_request(:delete, 'https://prezcat.example.com/v6/my_path?foo=bar').to_return(status: status, body: resp_body)
@@ -103,9 +105,10 @@ RSpec.describe Preservation::Client::VersionedApiService do
   end
 
   describe '#get' do
+    subject(:get) { service.send(:get, 'my_path', { foo: 'bar' }, on_data: nil) }
+
     let(:status) { 200 }
     let(:resp_body) { nil }
-    subject(:get) { service.send(:get, 'my_path', { foo: 'bar' }, on_data: nil) }
 
     before do
       stub_request(:get, 'https://prezcat.example.com/v6/my_path?foo=bar').to_return(status: status, body: resp_body)
@@ -143,6 +146,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
 
     context 'when streaming' do
       subject(:get) { service.send(:get, 'my_path', { foo: 'bar' }, on_data: callback) }
+
       let(:callback) { proc { |data, _count| buffer << data } }
       let(:buffer) { [] }
       let(:resp_body) { "I'm a little teacup" }

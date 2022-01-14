@@ -32,23 +32,29 @@ RSpec.describe Preservation::Client do
     subject(:client) { described_class.configure(url: prez_url, token: auth_token) }
 
     it 'returns Client class' do
-      expect(client).to eq Preservation::Client
+      expect(client).to eq described_class
     end
+
     it 'url is populated' do
       expect(client.instance.send(:url)).to eq prez_url
     end
+
     it 'auth token is populated' do
       expect(client.instance.send(:token)).to eq auth_token
     end
+
     it 'raises error if no url or token provided' do
       expect { described_class.configure }.to raise_error(ArgumentError, /missing keywords: :?url, :?token/)
     end
+
     it 'raises error if no url provided' do
       expect { described_class.configure(token: auth_token) }.to raise_error(ArgumentError, /missing keyword: :?url/)
     end
+
     it 'raises error if no token provided' do
       expect { described_class.configure(url: prez_url) }.to raise_error(ArgumentError, /missing keyword: :?token/)
     end
+
     it 'connection is populated' do
       connection = client.instance.send(:connection)
       expect(connection).to be_instance_of(Faraday::Connection)

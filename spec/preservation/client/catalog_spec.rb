@@ -1,20 +1,18 @@
 # frozen_string_literal: true
 
 RSpec.describe Preservation::Client::Catalog do
+  subject(:instance) { described_class.new(connection: conn) }
+
   let(:prez_api_url) { 'https://prezcat.example.com' }
+  let(:conn) { Preservation::Client.instance.send(:connection) }
+  let(:err_msg) { 'Mistakes were made.' }
   let(:auth_token) { 'my_secret_jwt_value' }
 
   before do
     Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
 
-  let(:conn) { Preservation::Client.instance.send(:connection) }
-  subject(:instance) { described_class.new(connection: conn) }
-  let(:err_msg) { 'Mistakes were made.' }
-
   describe '#update' do
-    let(:path) { "objects/#{druid}.json" }
-    let(:druid) { 'bj102hs9687' }
     subject(:update) do
       instance.update(druid: druid,
                       version: version,
@@ -22,6 +20,7 @@ RSpec.describe Preservation::Client::Catalog do
                       storage_location: 'some/storage/location/from/endpoint/table')
     end
 
+    let(:path) { "objects/#{druid}.json" }
     let(:expected_body) do
       {
         'checksums_validated' => 'true', 'druid' => 'bj102hs9687',
@@ -29,6 +28,7 @@ RSpec.describe Preservation::Client::Catalog do
         'storage_location' => 'some/storage/location/from/endpoint/table'
       }
     end
+    let(:druid) { 'bj102hs9687' }
 
     context 'when the request is successful' do
       context 'when the object is new (version == 1)' do
@@ -73,6 +73,7 @@ RSpec.describe Preservation::Client::Catalog do
 
       context 'when the object exists in the catalog (version > 1)' do
         let(:version) { 2 }
+
         context 'when API request succeeds' do
           before do
             stub_request(:patch, 'https://prezcat.example.com/v1/catalog/bj102hs9687')
