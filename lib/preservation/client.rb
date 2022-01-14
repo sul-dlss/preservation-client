@@ -63,6 +63,7 @@ module Preservation
     end
 
     attr_writer :url, :connection, :token
+
     delegate :update, to: :catalog
 
     private

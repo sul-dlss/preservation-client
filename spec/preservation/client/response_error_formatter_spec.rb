@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Preservation::Client::ResponseErrorFormatter do
+  subject(:formatter) { described_class.new(response: response, object_id: druid, client_method_name: method_name) }
+
   let(:druid) { 'oo666aa1234' }
   let(:method_name) { 'current_version' }
   let(:resp_status_msg) { 'Internal Server Error' }
@@ -9,8 +11,6 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
   let(:resp_env_url) { 'https://example.org/prezcat' }
   let(:resp_env) { instance_double(Faraday::Env, url: resp_env_url) }
   let(:response) { double(Faraday::Response, reason_phrase: resp_status_msg, status: resp_code, body: resp_body, env: resp_env) }
-
-  subject(:formatter) { described_class.new(response: response, object_id: druid, client_method_name: method_name) }
 
   describe '.format' do
     let(:mock_instance) { double('mock instance') }

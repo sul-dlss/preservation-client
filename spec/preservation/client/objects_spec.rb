@@ -12,43 +12,9 @@ RSpec.describe Preservation::Client::Objects do
     Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
 
-  describe '#current_version' do
-    let(:path) { "objects/#{druid}.json" }
-    let(:druid) { 'druid:oo000oo0000' }
-
-    context 'when API request succeeds' do
-      let(:result_version) { 3 }
-      let(:valid_response_body) do
-        {
-          'id': 666,
-          'druid': druid,
-          'current_version': result_version,
-          'created_at': '2019-09-06T13:01:29.076Z',
-          'updated_at': '2019-09-15T13:01:29.076Z',
-          'preservation_policy_id': 1
-        }
-      end
-
-      before do
-        allow(client).to receive(:get_json).with(path, druid).and_return(valid_response_body)
-      end
-
-      it 'returns the current version as an integer' do
-        expect(client.current_version(druid)).to eq result_version
-      end
-    end
-
-    context 'when API request fails' do
-      before do
-        allow(client).to receive(:get_json).with(path, druid).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
-      end
-
-      it 'raises an error' do
-        expect { client.current_version(druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
-      end
-    end
-  end
-
+  let(:manifest_filename) { 'signatureCatalog.xml' }
+  let(:file_druid) { 'druid:oo000oo0000' }
+  let(:file_api_path) { "objects/#{file_druid}/file" }
   let(:valid_prescat_content_diff_response) do
     <<-XML
       <fileInventoryDifference objectId="oo000oo0000" differenceCount="2" basis="v3-contentMetadata-all" other="new-contentMetadata-all" reportDatetime="2019-12-05T19:45:43Z">
@@ -72,12 +38,49 @@ RSpec.describe Preservation::Client::Objects do
     XML
   end
 
+  describe '#current_version' do
+    let(:path) { "objects/#{druid}.json" }
+    let(:druid) { 'druid:oo000oo0000' }
+
+    context 'when API request succeeds' do
+      let(:result_version) { 3 }
+      let(:valid_response_body) do
+        {
+          id: 666,
+          druid: druid,
+          current_version: result_version,
+          created_at: '2019-09-06T13:01:29.076Z',
+          updated_at: '2019-09-15T13:01:29.076Z',
+          preservation_policy_id: 1
+        }
+      end
+
+      before do
+        allow(client).to receive(:get_json).with(path, druid).and_return(valid_response_body)
+      end
+
+      it 'returns the current version as an integer' do
+        expect(client.current_version(druid)).to eq result_version
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(client).to receive(:get_json).with(path, druid).and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { client.current_version(druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
   describe '#content_inventory_diff' do
     let(:druid) { 'oo000oo0000' }
     let(:path) { "objects/#{druid}/content_diff" }
     let(:content_md) { '<contentMetadata>yer stuff here</contentMetadata>' }
     let(:params) { { druid: druid, content_metadata: content_md } }
-    let(:api_params) { { subset: 'all', version: nil }.merge(params.reject { |k, _v| k == :druid }) }
+    let(:api_params) { { subset: 'all', version: nil }.merge(params.except(:druid)) }
 
     context 'when API request succeeds' do
       before do
@@ -186,10 +189,6 @@ RSpec.describe Preservation::Client::Objects do
     end
   end
 
-  let(:file_api_path) { "objects/#{file_druid}/file" }
-  let(:file_druid) { 'druid:oo000oo0000' }
-  let(:manifest_filename) { 'signatureCatalog.xml' }
-
   describe '#content' do
     let(:filename) { 'content.pdf' }
     let(:file_api_params) do
@@ -202,7 +201,7 @@ RSpec.describe Preservation::Client::Objects do
 
     context 'when API request succeeds' do
       let(:valid_response_body) do
-        File.open("spec/fixtures/#{filename}").read
+        File.read("spec/fixtures/#{filename}")
       end
 
       before do
