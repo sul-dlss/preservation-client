@@ -4,7 +4,7 @@ module Preservation
   class Client
     # This wraps any faraday connection errors with preservation-client errors
     # see https://www.rubydoc.info/gems/faraday/Faraday/ClientError for info on errors
-    class ErrorFaradayMiddleware < Faraday::Response::Middleware
+    class ErrorFaradayMiddleware < Faraday::Middleware
       def call(env)
         @app.call(env)
       rescue Faraday::ConnectionFailed, Faraday::SSLError, Faraday::TimeoutError => e
