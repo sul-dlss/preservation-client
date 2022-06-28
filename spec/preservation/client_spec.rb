@@ -5,7 +5,7 @@ RSpec.describe Preservation::Client do
   let(:auth_token) { 'my_secret_jwt_value' }
 
   it 'has a version number' do
-    expect(Preservation::Client::VERSION).not_to be nil
+    expect(Preservation::Client::VERSION).not_to be_nil
   end
 
   context 'once configured' do
