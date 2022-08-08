@@ -23,12 +23,9 @@ GEM
     concurrent-ruby (1.1.10)
     crack (0.4.5)
       rexml
-    deprecation (1.1.0)
-      activesupport
     diff-lcs (1.5.0)
     docile (1.4.0)
-    druid-tools (2.2.1)
-      deprecation
+    druid-tools (3.0.0)
     faraday (2.4.0)
       faraday-net_http (~> 2.0)
       ruby2_keywords (>= 0.0.4)
@@ -39,7 +36,7 @@ GEM
     json (2.6.2)
     method_source (1.0.0)
     minitest (5.16.2)
-    moab-versioning (5.1.0)
+    moab-versioning (5.2.0)
       druid-tools (>= 1.0.0)
       json
       nokogiri
@@ -76,7 +73,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.11.0)
     rspec-support (3.11.0)
-    rubocop (1.32.0)
+    rubocop (1.33.0)
       json (~> 2.3)
       parallel (~> 1.10)
       parser (>= 3.1.0.0)
@@ -86,7 +83,7 @@ GEM
       rubocop-ast (>= 1.19.1, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 3.0)
-    rubocop-ast (1.19.1)
+    rubocop-ast (1.20.1)
       parser (>= 3.1.1.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
@@ -103,7 +100,7 @@ GEM
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
-    webmock (3.14.0)
+    webmock (3.17.0)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
