@@ -1,17 +1,12 @@
 # frozen_string_literal: true
 
 RSpec.describe Preservation::Client::Objects do
-  subject(:client) { described_class.new(connection: connection, api_version: '') }
+  let(:client) { described_class.new(connection: connection, api_version: '') }
 
   let(:connection) { Preservation::Client.instance.send(:connection) }
   let(:prez_api_url) { 'https://prezcat.example.com' }
   let(:auth_token) { 'my_secret_jwt_value' }
   let(:err_msg) { 'Mistakes were made.' }
-
-  before do
-    Preservation::Client.configure(url: prez_api_url, token: auth_token)
-  end
-
   let(:manifest_filename) { 'signatureCatalog.xml' }
   let(:file_druid) { 'druid:oo000oo0000' }
   let(:file_api_path) { "objects/#{file_druid}/file" }
@@ -36,6 +31,10 @@ RSpec.describe Preservation::Client::Objects do
         </fileGroupDifference>
       </fileInventoryDifference>
     XML
+  end
+
+  before do
+    Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
 
   describe '#current_version' do

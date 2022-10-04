@@ -10,16 +10,15 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
   let(:resp_body) { 'Something is terribly wrong' }
   let(:resp_env_url) { 'https://example.org/prezcat' }
   let(:resp_env) { instance_double(Faraday::Env, url: resp_env_url) }
-  let(:response) { double(Faraday::Response, reason_phrase: resp_status_msg, status: resp_code, body: resp_body, env: resp_env) }
+  let(:response) { instance_double(Faraday::Response, reason_phrase: resp_status_msg, status: resp_code, body: resp_body, env: resp_env) }
 
   describe '.format' do
-    let(:mock_instance) { double('mock instance') }
+    let(:mock_instance) { instance_double(described_class) }
 
     it 'calls #format on a new instance' do
       allow(mock_instance).to receive(:format)
       allow(described_class).to receive(:new).with(response: response, object_id: nil, client_method_name: nil).and_return(mock_instance)
       described_class.format(response: response)
-      expect(described_class).to have_received(:new).once
       expect(mock_instance).to have_received(:format).once
     end
   end
@@ -50,7 +49,7 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
     end
 
     context 'with a blank body' do
-      let(:response) { double('http response', reason_phrase: resp_status_msg, status: resp_code, body: '', env: resp_env) }
+      let(:response) { instance_double(Faraday::Response, reason_phrase: resp_status_msg, status: resp_code, body: '', env: resp_env) }
 
       it 'sets a default body attribute' do
         expect(formatter.body).to eq(described_class::DEFAULT_BODY)
@@ -74,7 +73,7 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
     end
 
     context 'when no reason_phrase' do
-      let(:response) { double(Faraday::Response, reason_phrase: nil, status: resp_code, body: resp_body, env: resp_env) }
+      let(:response) { instance_double(Faraday::Response, reason_phrase: nil, status: resp_code, body: resp_body, env: resp_env) }
 
       it 'has sensible error message without reason_phrase id' do
         exp_msg = "Preservation::Client.#{method_name} for #{druid} got #{resp_code} from Preservation at #{resp_env_url}: #{resp_body}"

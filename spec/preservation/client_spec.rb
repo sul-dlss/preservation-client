@@ -8,18 +8,19 @@ RSpec.describe Preservation::Client do
     expect(Preservation::Client::VERSION).not_to be_nil
   end
 
-  context 'once configured' do
+  context 'when configured' do
     before do
       described_class.configure(url: prez_url, token: auth_token)
     end
 
     describe '.objects' do
-      it 'returns an instance of Client::Objects' do
+      it 'returns an instance of Preservation::Client::Objects' do
         expect(described_class.objects).to be_instance_of Preservation::Client::Objects
       end
 
       it 'returns the memoized instance when called again' do
-        expect(described_class.objects).to eq described_class.objects
+        first_time = described_class.objects
+        expect(described_class.objects).to eq first_time
       end
 
       it 'uses default api version' do
