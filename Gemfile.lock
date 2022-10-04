@@ -41,6 +41,8 @@ GEM
       json
       nokogiri
       nokogiri-happymapper
+    nokogiri (1.13.8-x86_64-darwin)
+      racc (~> 1.4)
     nokogiri (1.13.8-x86_64-linux)
       racc (~> 1.4)
     nokogiri-happymapper (0.9.0)
@@ -107,6 +109,7 @@ GEM
     zeitwerk (2.6.1)
 
 PLATFORMS
+  x86_64-darwin-19
   x86_64-linux
 
 DEPENDENCIES
