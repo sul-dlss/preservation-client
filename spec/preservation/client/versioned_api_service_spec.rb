@@ -14,11 +14,11 @@ RSpec.describe Preservation::Client::VersionedApiService do
   end
 
   it 'populates api_version' do
-    expect(subject.send(:api_version)).to eq 'v6'
+    expect(service.send(:api_version)).to eq 'v6'
   end
 
   it 'populates connection' do
-    expect(subject.send(:connection)).to eq conn
+    expect(service.send(:connection)).to eq conn
   end
 
   describe '#get_json' do
@@ -28,7 +28,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
     it 'request url includes api_version when it is non-blank' do
       resp_body = JSON.generate(foo: 'have api version')
       stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
-      expect(subject.send(:get_json, path, druid)).to eq JSON.parse(resp_body)
+      expect(service.send(:get_json, path, druid)).to eq JSON.parse(resp_body)
     end
 
     it 'request url has no api_version when it is blank' do
@@ -43,7 +43,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
 
       it 'returns response body' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
-        expect(subject.send(:get_json, path, druid)).to eq JSON.parse(resp_body)
+        expect(service.send(:get_json, path, druid)).to eq JSON.parse(resp_body)
       end
     end
 
@@ -51,14 +51,14 @@ RSpec.describe Preservation::Client::VersionedApiService do
       it 'raises Preservation::Client::NotFoundError' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 404)
         exp_msg = "#{druid} not found in Preservation at #{prez_api_url}/#{api_version}/#{path}"
-        expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::NotFoundError, exp_msg)
+        expect { service.send(:get_json, path, druid) }.to raise_error(Preservation::Client::NotFoundError, exp_msg)
       end
     end
 
     context 'when response is 301' do
       it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
         stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 301)
-        expect { subject.send(:get_json, path, druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
+        expect { service.send(:get_json, path, druid) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 301/)
       end
     end
   end
@@ -168,7 +168,7 @@ RSpec.describe Preservation::Client::VersionedApiService do
 
         it 'request url includes api_version when it is non-blank' do
           stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: 'have api version', status: 200)
-          expect(subject.send(method, path, params)).to eq 'have api version'
+          expect(service.send(method, path, params)).to eq 'have api version'
         end
 
         it 'request url has no api_version when it is blank' do
@@ -190,21 +190,21 @@ RSpec.describe Preservation::Client::VersionedApiService do
 
           it 'returns response body' do
             stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
-            expect(subject.send(method, path, params)).to eq resp_body
+            expect(service.send(method, path, params)).to eq resp_body
           end
         end
 
         context 'when response status is 404' do
           it 'raises Preservation::Client::NotFound with message from ResponseErrorFormatter' do
             stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 404)
-            expect { subject.send(method, path, params) }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
+            expect { service.send(method, path, params) }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
           end
         end
 
         context 'when response status is neither 200 or 404' do
           it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
             stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 500)
-            expect { subject.send(method, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
+            expect { service.send(method, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
           end
         end
       end
