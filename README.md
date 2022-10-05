@@ -88,10 +88,6 @@ Note that the preservation service is behind a firewall.
     - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8')` - returns contents of identityMetadata.xml in version 8 of Moab object
 - `client.objects.signature_catalog('oo000oo0000')` - returns latest Moab::SignatureCatalog from Moab
 
-### Retrieve the primary moab storage location
-
-- `client.objects.primary_moab_location(druid: 'ooo000oo0000')` - returns the path to the storage location for the primary moab
-
 ### Validate the Moab
 
 - `client.objects.validate_moab(druid: 'ooo000oo0000')` - validates that the Moab object, used by preservationWF to ensure we have a valid Moab before replicating to various preservation endpoints
@@ -99,6 +95,7 @@ Note that the preservation service is behind a firewall.
 ### Get difference information between passed contentMetadata.xml and files in the Moab
 
 - `client.objects.content_inventory_diff(druid: 'oo000oo0000', content_metadata: '<contentMetadata>...</contentMetadata>')` - returns Moab::FileInventoryDifference containing differences between passed content metadata and latest version for subset 'all'
+
   - you may specify the subset (all|shelve|preserve|publish) and/or the version:
     - `client.objects.content_inventory_diff(druid: 'oo000oo0000', subset: 'publish', version: '1', content_metadata: '<contentMetadata>...</contentMetadata>')`
 
@@ -107,6 +104,7 @@ Note that the preservation service is behind a firewall.
 ### Alert the catalog that an object has been changed and needs to be updated
 
 - `client.update(druid: 'oo000oo0000', version: 3, size: 2342, storage_location: 'some/storage/location')` - returns true if it worked
+
 ## Development
 
 After checking out the repo, run `bundle` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

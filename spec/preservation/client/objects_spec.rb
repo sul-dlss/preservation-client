@@ -350,36 +350,6 @@ RSpec.describe Preservation::Client::Objects do
     end
   end
 
-  describe '#primary_moab_location' do
-    subject(:request) { client.primary_moab_location(druid: druid) }
-
-    let(:druid) { 'oo000oo0000' }
-    let(:locked_message) { "Cannot retrieve primary moab location because versioning is locked for the preserved object with id #{druid}" }
-    let(:storage_location) { 'a/generic/storage_root/sdr2objects' }
-
-    context 'when API request succeeds' do
-      before do
-        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/primary_moab_location")
-          .to_return(status: 200, body: storage_location, headers: {})
-      end
-
-      it 'returns the path to the primary moab storage location' do
-        expect(request).to eq storage_location
-      end
-    end
-
-    context 'when API request fails' do
-      before do
-        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/primary_moab_location")
-          .to_return(status: 423, body: locked_message, headers: {})
-      end
-
-      it 'raises an error' do
-        expect { request }.to raise_error(Preservation::Client::LockedError)
-      end
-    end
-  end
-
   describe '#signature_catalog' do
     let(:file_api_params) do
       {

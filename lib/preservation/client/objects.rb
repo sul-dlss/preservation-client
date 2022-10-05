@@ -80,15 +80,6 @@ module Preservation
         get("objects/#{druid}/validate_moab", {}, on_data: nil)
       end
 
-      # retrieve the storage location for the primary moab of the given druid
-      # @param [String] druid - with or without prefix: 'druid:ab123cd4567' or 'ab123cd4567'
-      # @return [String] the storage location of the primary moab for the given druid
-      # @raise [Preservation::Client::NotFoundError] when druid is not found
-      # @raise [Preservation::Client::LockedError] when druid is in locked state (not available for versioning)
-      def primary_moab_location(druid:)
-        get("objects/#{druid}/primary_moab_location", {}, on_data: nil)
-      end
-
       # convenience method for retrieving latest Moab::SignatureCatalog from a Moab object,
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
       # @return [Moab::SignatureCatalog] the manifest of all files previously ingested
