@@ -77,7 +77,7 @@ module Preservation
     end
 
     def connection
-      @connection ||= Faraday.new(url) do |builder|
+      @connection ||= Faraday.new(url, request: { read_timeout: 300 }) do |builder|
         builder.use ErrorFaradayMiddleware
         builder.use Faraday::Request::UrlEncoded
         builder.use Faraday::Response::RaiseError # raise exceptions on 40x, 50x responses
