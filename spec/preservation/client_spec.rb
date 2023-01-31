@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 RSpec.describe Preservation::Client do
+  subject(:client) { described_class.configure(url: prez_url, token: auth_token) }
+
   let(:prez_url) { 'https://prezcat.example.com' }
   let(:auth_token) { 'my_secret_jwt_value' }
 
@@ -30,8 +32,6 @@ RSpec.describe Preservation::Client do
   end
 
   describe '#configure' do
-    subject(:client) { described_class.configure(url: prez_url, token: auth_token) }
-
     it 'returns Client class' do
       expect(client).to eq described_class
     end
@@ -64,6 +64,35 @@ RSpec.describe Preservation::Client do
         'User-Agent' => "preservation-client #{Preservation::Client::VERSION}",
         'Authorization' => "Bearer #{auth_token}"
       )
+    end
+  end
+
+  # NOTE: Unlike the other instance attrs tested above, read_timeout has
+  #       different behavior (namely: defaulting instead of blowing up at
+  #       configure time), so it is tested separately here
+  describe '#read_timeout' do
+    context 'when not configured' do
+      it 'uses the default value' do
+        expect(client.instance.send(:read_timeout)).to eq described_class::DEFAULT_TIMEOUT
+      end
+    end
+
+    context 'when configured with override value' do
+      subject(:client) { described_class.configure(url: prez_url, token: auth_token, read_timeout: read_timeout) }
+
+      let(:read_timeout) { 6000 }
+
+      it 'uses the supplied value' do
+        expect(client.instance.send(:read_timeout)).to eq(read_timeout)
+      end
+    end
+
+    context 'when configured with nil value' do
+      subject(:client) { described_class.configure(url: prez_url, token: auth_token, read_timeout: nil) }
+
+      it 'raises an error' do
+        expect { client.instance.send(:read_timeout) }.to raise_error(described_class::Error, /read timeout has not been configured/)
+      end
     end
   end
 end

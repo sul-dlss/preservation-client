@@ -32,6 +32,7 @@ module Preservation
     class ConnectionFailedError < Error; end
 
     DEFAULT_API_VERSION = 'v1'
+    DEFAULT_TIMEOUT = 300
     TOKEN_HEADER = 'Authorization'
 
     include Singleton
@@ -47,11 +48,13 @@ module Preservation
     end
 
     class << self
-      # @param [String] url
+      # @param [String] url the endpoint URL
       # @param [String] token a bearer token for HTTP authentication
-      def configure(url:, token:)
+      # @param [Integer] read_timeout the value in seconds of the read timeout
+      def configure(url:, token:, read_timeout: DEFAULT_TIMEOUT)
         instance.url = url
         instance.token = token
+        instance.read_timeout = read_timeout
 
         # Force connection to be re-established when `.configure` is called
         instance.connection = nil
@@ -62,7 +65,7 @@ module Preservation
       delegate :objects, :update, to: :instance
     end
 
-    attr_writer :url, :connection, :token
+    attr_writer :connection, :read_timeout, :token, :url
 
     delegate :update, to: :catalog
 
@@ -76,8 +79,12 @@ module Preservation
       @token || raise(Error, 'auth token has not been configured')
     end
 
+    def read_timeout
+      @read_timeout || raise(Error, 'read timeout has not been configured')
+    end
+
     def connection
-      @connection ||= Faraday.new(url, request: { read_timeout: 300 }) do |builder|
+      @connection ||= Faraday.new(url, request: { read_timeout: read_timeout }) do |builder|
         builder.use ErrorFaradayMiddleware
         builder.use Faraday::Request::UrlEncoded
         builder.use Faraday::Response::RaiseError # raise exceptions on 40x, 50x responses
