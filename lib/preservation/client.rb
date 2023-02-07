@@ -23,6 +23,9 @@ module Preservation
     # Error raised when server returns 423 Locked
     class LockedError < Error; end
 
+    # Error raised when server returns 409 Conflict
+    class ConflictError < Error; end
+
     # Error raised when server returns an unexpected response
     # e.g., 4xx or 5xx status not otherwise handled
     class UnexpectedResponseError < Error; end

@@ -201,10 +201,29 @@ RSpec.describe Preservation::Client::VersionedApiService do
           end
         end
 
-        context 'when response status is neither 200 or 404' do
-          it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter' do
+        context 'when response is 409' do
+          it 'raises Preservation::Client::ConflictError with message from ResponseErrorFormatter' do
+            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 409)
+            expect { service.send(method, path, params) }.to raise_error(Preservation::Client::ConflictError, /got 409/)
+          end
+        end
+
+        context 'when response is 423' do
+          it 'raises Preservation::Client::LockedError with message from ResponseErrorFormatter' do
+            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 423)
+            expect { service.send(method, path, params) }.to raise_error(Preservation::Client::LockedError, /got 423/)
+          end
+        end
+
+        context 'when response status is other than a specifically handled error' do
+          it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter for a 500 error' do
             stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 500)
             expect { service.send(method, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 500/)
+          end
+
+          it 'raises Preservation::Client::UnexpectedResponseError with message from ResponseErrorFormatter for any other unexpected error' do
+            stub_request(method, "#{prez_api_url}/#{api_version}/#{path}").to_return(status: 418)
+            expect { service.send(method, path, params) }.to raise_error(Preservation::Client::UnexpectedResponseError, /got 418/)
           end
         end
       end
