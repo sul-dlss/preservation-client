@@ -95,8 +95,19 @@ module Preservation
       rescue Faraday::Error => e
         errmsg = "Preservation::Client.#{caller_locations.first.label} " \
                  "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
-        exception_class = e.response[:status] == 423 ? LockedError : UnexpectedResponseError
-        raise exception_class, errmsg
+        raise http_exception_class(e.response[:status]), errmsg
+      end
+
+      # @param status_code [Integer] the HTTP status code to translate to an exception class
+      def http_exception_class(status_code)
+        case status_code
+        when 423
+          LockedError
+        when 409
+          ConflictError
+        else
+          UnexpectedResponseError
+        end
       end
     end
   end
