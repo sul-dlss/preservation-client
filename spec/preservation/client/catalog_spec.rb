@@ -23,9 +23,20 @@ RSpec.describe Preservation::Client::Catalog do
     let(:path) { "objects/#{druid}.json" }
     let(:expected_body) do
       {
-        'checksums_validated' => 'true', 'druid' => 'bj102hs9687',
-        'incoming_size' => '2342', 'incoming_version' => version,
-        'storage_location' => 'some/storage/location/from/endpoint/table'
+        'druid' => 'bj102hs9687',
+        'incoming_version' => version,
+        'incoming_size' => 2342,
+        'storage_location' => 'some/storage/location/from/endpoint/table',
+        'checksums_validated' => true
+      }.to_json
+    end
+    let(:expected_headers) do
+      {
+        'Accept' => '*/*',
+        'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+        'Authorization' => 'Bearer my_secret_jwt_value',
+        'Content-Type' => 'application/json',
+        'User-Agent' => 'preservation-client 5.3.0'
       }
     end
     let(:druid) { 'bj102hs9687' }
@@ -37,36 +48,36 @@ RSpec.describe Preservation::Client::Catalog do
         context 'when API request succeeds' do
           before do
             stub_request(:post, 'https://prezcat.example.com/v1/catalog')
-              .with(body: expected_body)
+              .with(body: expected_body, headers: expected_headers)
               .to_return(status: 200, body: '', headers: {})
           end
 
-          it { is_expected.to be true }
+          it { is_expected.to eq '' }
         end
 
         context 'when API request fails' do
           before do
             stub_request(:post, 'https://prezcat.example.com/v1/catalog')
-              .with(body: expected_body)
-              .to_return(status: 500, body: '', headers: {})
+              .with(body: expected_body, headers: expected_headers)
+              .to_return(status: 500, body: 'ActiveRecord::ConnectionNotEstablished', headers: {})
           end
 
           it 'raises an error' do
             expect { update }.to raise_error(Preservation::Client::UnexpectedResponseError,
-                                             'the server responded with status 500')
+                                             %r{got 500 from Preservation at v1/catalog: ActiveRecord::ConnectionNotEstablished})
           end
         end
 
         context 'when API redirects' do
           before do
             stub_request(:post, 'https://prezcat.example.com/v1/catalog')
-              .with(body: expected_body)
+              .with(body: expected_body, headers: expected_headers)
               .to_return(status: 301, body: '', headers: {})
           end
 
           it 'raises an error' do
             expect { update }.to raise_error(Preservation::Client::UnexpectedResponseError,
-                                             'response was not successful. Received status 301')
+                                             %r{got 301 from Preservation at https://prezcat.example.com/v1/catalog})
           end
         end
       end
@@ -77,22 +88,22 @@ RSpec.describe Preservation::Client::Catalog do
         context 'when API request succeeds' do
           before do
             stub_request(:patch, 'https://prezcat.example.com/v1/catalog/bj102hs9687')
-              .with(body: expected_body)
+              .with(body: expected_body, headers: expected_headers)
               .to_return(status: 200, body: '', headers: {})
           end
 
-          it { is_expected.to be true }
+          it { is_expected.to eq '' }
         end
 
         context 'when API request fails' do
           before do
             stub_request(:patch, 'https://prezcat.example.com/v1/catalog/bj102hs9687')
-              .with(body: expected_body)
-              .to_return(status: 500, body: '', headers: {})
+              .with(body: expected_body, headers: expected_headers)
+              .to_return(status: 500, body: 'ActiveRecord::ConnectionNotEstablished', headers: {})
           end
 
           it 'raises an error' do
-            expect { update }.to raise_error(Preservation::Client::UnexpectedResponseError, 'the server responded with status 500')
+            expect { update }.to raise_error(Preservation::Client::UnexpectedResponseError, %r{got 500 from Preservation at v1/catalog/bj102hs9687: ActiveRecord::ConnectionNotEstablished})
           end
         end
       end
