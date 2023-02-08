@@ -23,18 +23,9 @@ module Preservation
       private
 
       def request(druid:, version:, http_args:)
-        result = if version == 1
-                   connection.post "/#{api_version}/catalog", http_args
-                 else
-                   connection.patch "/#{api_version}/catalog/#{druid}", http_args
-                 end
-        unless result.success?
-          raise UnexpectedResponseError, "response was not successful. Received status #{result.status}"
-        end
+        return post('catalog', http_args) if version == 1
 
-        true
-      rescue Faraday::Error => e
-        raise UnexpectedResponseError, e
+        patch("catalog/#{druid}", http_args)
       end
     end
   end
