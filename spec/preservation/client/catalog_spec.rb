@@ -36,7 +36,7 @@ RSpec.describe Preservation::Client::Catalog do
         'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
         'Authorization' => 'Bearer my_secret_jwt_value',
         'Content-Type' => 'application/json',
-        'User-Agent' => 'preservation-client 5.3.0'
+        'User-Agent' => "preservation-client #{Preservation::Client::VERSION}"
       }
     end
     let(:druid) { 'bj102hs9687' }
