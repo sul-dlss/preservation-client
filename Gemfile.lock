@@ -41,9 +41,9 @@ GEM
       json
       nokogiri
       nokogiri-happymapper
-    nokogiri (1.14.1-x86_64-darwin)
+    nokogiri (1.14.2-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.14.1-x86_64-linux)
+    nokogiri (1.14.2-x86_64-linux)
       racc (~> 1.4)
     nokogiri-happymapper (0.9.0)
       nokogiri (~> 1.5)
@@ -87,7 +87,7 @@ GEM
       unicode-display_width (>= 2.4.0, < 3.0)
     rubocop-ast (1.26.0)
       parser (>= 3.2.1.0)
-    rubocop-capybara (2.17.0)
+    rubocop-capybara (2.17.1)
       rubocop (~> 1.41)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
