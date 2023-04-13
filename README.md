@@ -31,7 +31,7 @@ Preservation::Client is a singleton object, and thus can be used as a class or a
 require 'preservation/client'
 
 def do_the_thing
-  current_version_as_integer = client.current_version('druid:oo000oo0000')
+  current_version_as_integer = client.objects.current_version('druid:oo000oo0000')
 end
 
 private
@@ -51,7 +51,7 @@ def initialize
 end
 
 def do_the_thing
-  current_version_as_integer = Preservation::Client.current_version('druid:oo000oo0000')
+  current_version_as_integer = Preservation::Client.objects.current_version('druid:oo000oo0000')
 end
 ```
 
