@@ -39,11 +39,40 @@ RSpec.describe Preservation::Client::VersionedApiService do
     end
 
     context 'when response status success' do
-      let(:resp_body) { JSON.generate(foo: 'bar') }
+      context 'when response body is object' do
+        let(:resp_json) { service.send(:get_json, path, druid) }
+        let(:resp_body) { JSON.generate(foo: 'bar') }
 
-      it 'returns response body' do
-        stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
-        expect(service.send(:get_json, path, druid)).to eq JSON.parse(resp_body)
+        it 'returns response body' do
+          stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
+          expect(resp_json).to eq JSON.parse(resp_body)
+          # Is with indifferent access
+          expect(resp_json['foo']).to eq 'bar'
+          expect(resp_json[:foo]).to eq 'bar'
+        end
+      end
+
+      context 'when response body is array' do
+        let(:resp_json) { service.send(:get_json, path, druid) }
+        let(:resp_body) { JSON.generate([{ foo: 'bar' }, 1]) }
+
+        it 'returns response body' do
+          stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
+          expect(resp_json).to eq JSON.parse(resp_body)
+          # Is with indifferent access
+          expect(resp_json.first['foo']).to eq 'bar'
+          expect(resp_json.first[:foo]).to eq 'bar'
+        end
+      end
+
+      context 'when response body is value' do
+        let(:resp_json) { service.send(:get_json, path, druid) }
+        let(:resp_body) { JSON.generate(1) }
+
+        it 'returns response body' do
+          stub_request(:get, "#{prez_api_url}/#{api_version}/#{path}").to_return(body: resp_body, status: 200)
+          expect(resp_json).to eq JSON.parse(resp_body)
+        end
       end
     end
 

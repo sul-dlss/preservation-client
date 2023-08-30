@@ -188,6 +188,38 @@ RSpec.describe Preservation::Client::Objects do
     end
   end
 
+  describe '#checksum' do
+    context 'when API request succeeds' do
+      let(:valid_json_response) do
+        [{
+          'filename' => 'oo000oo0000_img_1.tif',
+          'md5' => 'ffc0cc90e4215e0a3d822b04a8eab980',
+          'sha1' => 'd2703add746d7b6e2e5f8a73ef7c06b087b3fae5',
+          'sha256' => '6b66cc2df50427d03dca8608af20b3fd96d76b67ba41c148901aa1a60527032f',
+          'filesize' => '4403882'
+        }]
+      end
+
+      before do
+        allow(client).to receive(:get_json).with('objects/oo000oo0000/checksum', 'oo000oo0000').and_return(valid_json_response)
+      end
+
+      it 'returns the API response' do
+        expect(client.checksum(druid: 'oo000oo0000')).to eq valid_json_response
+      end
+    end
+
+    context 'when API request fails' do
+      before do
+        allow(client).to receive(:get_json).with('objects/oo000oo0000/checksum', 'oo000oo0000').and_raise(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+
+      it 'raises an error' do
+        expect { client.checksum(druid: 'oo000oo0000') }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
   describe '#content' do
     let(:filename) { 'content.pdf' }
     let(:file_api_params) do

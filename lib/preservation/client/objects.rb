@@ -16,6 +16,12 @@ module Preservation
       end
 
       # @param [String] druid - with or without prefix: 'druid:bb123cd4567' OR 'bb123cd4567'
+      # @return [Hash] the checksums and filesize for the druid
+      def checksum(druid:)
+        get_json("objects/#{druid}/checksum", druid)
+      end
+
+      # @param [String] druid - with or without prefix: 'druid:bb123cd4567' OR 'bb123cd4567'
       # @param [String] content_metadata - contentMetadata.xml to be compared against a version of Moab
       # @param [String] subset - (default: 'all') which subset of files to compare (all|shelve|preserve|publish)
       # @param [String] version - version of Moab to be compared against (defaults to nil for latest version)
