@@ -21,7 +21,7 @@ module Preservation
           req.headers['Content-Type'] = 'application/json'
           req.headers['Accept'] = 'application/json'
         end
-        return JSON.parse(resp.body).with_indifferent_access if resp.success?
+        return with_indifferent_access_for(JSON.parse(resp.body)) if resp.success?
 
         errmsg = ResponseErrorFormatter
                  .format(response: resp, object_id: object_id, client_method_name: caller_locations.first.label)
@@ -107,6 +107,16 @@ module Preservation
           ConflictError
         else
           UnexpectedResponseError
+        end
+      end
+
+      def with_indifferent_access_for(obj)
+        if obj.is_a?(Array)
+          obj.map { |member| with_indifferent_access_for(member) }
+        elsif obj.is_a?(Hash)
+          obj.with_indifferent_access
+        else
+          obj
         end
       end
     end
