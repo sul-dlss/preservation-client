@@ -72,8 +72,6 @@ Note that the preservation service is behind a firewall.
 
 ### Retrieve file signature (checksum) information
 
-- `client.objects.checksums(druids: druids)` - returns info as raw csv
-- `client.objects.checksums(druids: druids, format: 'json')` - returns info as json
 - `client.objects.checksum(druid: 'oo000oo0000')` - returns info as array of hashes
 
 ### Retrieve individual files from preservation

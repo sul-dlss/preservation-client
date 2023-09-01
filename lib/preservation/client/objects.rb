@@ -8,13 +8,6 @@ module Preservation
   class Client
     # API calls that are about Preserved Objects
     class Objects < VersionedApiService
-      # @param [Array] druids - required list of druids with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
-      # @param [String] resp_format - desired format of the HTTP response (default csv, json also possible)
-      # @return body of HTTP response from Preservation API - the checksums and filesize for each druid
-      def checksums(druids: [], resp_format: 'csv')
-        post('objects/checksums', druids: druids, format: resp_format)
-      end
-
       # @param [String] druid - with or without prefix: 'druid:bb123cd4567' OR 'bb123cd4567'
       # @return [Hash] the checksums and filesize for the druid
       def checksum(druid:)
