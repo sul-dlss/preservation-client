@@ -20,8 +20,8 @@ GEM
       minitest (>= 5.1)
       mutex_m
       tzinfo (~> 2.0)
-    addressable (2.8.6)
-      public_suffix (>= 2.0.2, < 6.0)
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
     ast (2.4.2)
     base64 (0.2.0)
     bigdecimal (3.1.8)
@@ -36,7 +36,7 @@ GEM
     docile (1.4.0)
     drb (2.2.1)
     druid-tools (3.0.0)
-    faraday (2.9.1)
+    faraday (2.9.2)
       faraday-net_http (>= 2.0, < 3.2)
     faraday-net_http (3.1.0)
       net-http
@@ -46,7 +46,7 @@ GEM
     json (2.7.2)
     language_server-protocol (3.17.0.3)
     method_source (1.1.0)
-    minitest (5.23.1)
+    minitest (5.24.0)
     moab-versioning (6.1.0)
       druid-tools (>= 1.0.0)
       json
@@ -71,7 +71,7 @@ GEM
     pry-byebug (3.10.1)
       byebug (~> 11.0)
       pry (>= 0.13, < 0.15)
-    public_suffix (5.1.1)
+    public_suffix (6.0.0)
     racc (1.8.0)
     rainbow (3.1.1)
     rake (13.2.1)
