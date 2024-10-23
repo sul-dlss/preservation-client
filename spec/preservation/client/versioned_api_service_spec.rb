@@ -180,9 +180,19 @@ RSpec.describe Preservation::Client::VersionedApiService do
       let(:buffer) { [] }
       let(:resp_body) { "I'm a little teacup" }
 
-      it 'streams' do
-        get
-        expect(buffer).to eq ["I'm a little teacup"]
+      context 'when it is successful' do
+        it 'streams' do
+          get
+          expect(buffer).to eq ["I'm a little teacup"]
+        end
+      end
+
+      context 'when an error response' do
+        let(:status) { 404 }
+
+        it 'raises' do
+          expect { get }.to raise_error(Preservation::Client::NotFoundError, /got 404/)
+        end
       end
     end
   end

@@ -41,8 +41,16 @@ module Preservation
       def get(path, params, on_data:)
         return http_response(:get, path, params) unless on_data
 
+        req_url = "#{api_version}/#{path}"
         connection.get("#{api_version}/#{path}", params) do |req|
-          req.options.on_data = on_data
+          req.options.on_data = proc do |chunk, size, env|
+            if env.status >= 300
+              errmsg = "Preservation::Client.#{caller_locations.first.label} " \
+                       "got #{env.status} from Preservation at #{req_url}"
+              raise http_exception_class(env.status), errmsg
+            end
+            on_data.call(chunk, size, env)
+          end
         end
       end
 
@@ -101,6 +109,8 @@ module Preservation
       # @param status_code [Integer] the HTTP status code to translate to an exception class
       def http_exception_class(status_code)
         case status_code
+        when 404
+          NotFoundError
         when 423
           LockedError
         when 409
