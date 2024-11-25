@@ -52,7 +52,7 @@ GEM
     language_server-protocol (3.17.0.3)
     logger (1.6.1)
     method_source (1.1.0)
-    minitest (5.25.1)
+    minitest (5.25.2)
     moab-versioning (6.1.0)
       druid-tools (>= 1.0.0)
       json
