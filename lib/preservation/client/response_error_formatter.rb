@@ -13,23 +13,25 @@ module Preservation
         new(response: response, object_id: object_id, client_method_name: client_method_name).format
       end
 
-      attr_reader :req_url, :status_msg, :status_code, :body, :object_id, :client_method_name
-
       def initialize(response:, object_id: nil, client_method_name: nil)
         @req_url = response.env.url
         @status_msg = response.reason_phrase
         @status_code = response.status
         @body = response.body.present? ? response.body : DEFAULT_BODY
-        @object_id = object_id
+        @id = object_id
         @client_method_name = client_method_name
       end
 
       def format
         status_info = status_msg.blank? ? status_code : "#{status_msg} (#{status_code})"
-        object_id_info = " for #{object_id}" if object_id.present?
+        object_id_info = " for #{id}" if id.present?
 
         "Preservation::Client.#{client_method_name}#{object_id_info} got #{status_info} from Preservation at #{req_url}: #{body}"
       end
+
+      private
+
+      attr_reader :req_url, :status_msg, :status_code, :body, :id, :client_method_name
     end
   end
 end

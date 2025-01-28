@@ -24,35 +24,11 @@ RSpec.describe Preservation::Client::ResponseErrorFormatter do
   end
 
   describe '#initialize' do
-    it 'populates status_msg attribute' do
-      expect(formatter.status_msg).to eq(resp_status_msg)
-    end
-
-    it 'populates status_code attribute' do
-      expect(formatter.status_code).to eq(resp_code)
-    end
-
-    it 'populates body attribute' do
-      expect(formatter.body).to eq(resp_body)
-    end
-
-    it 'populates req_url attribute' do
-      expect(formatter.req_url).to eq(resp_env_url)
-    end
-
-    it 'populates object_id attribute' do
-      expect(formatter.object_id).to eq(druid)
-    end
-
-    it 'populates client_method_name attribute' do
-      expect(formatter.client_method_name).to eq(method_name)
-    end
-
     context 'with a blank body' do
       let(:response) { instance_double(Faraday::Response, reason_phrase: resp_status_msg, status: resp_code, body: '', env: resp_env) }
 
       it 'sets a default body attribute' do
-        expect(formatter.body).to eq(described_class::DEFAULT_BODY)
+        expect(formatter.send(:body)).to eq(described_class::DEFAULT_BODY)
       end
     end
   end
