@@ -53,7 +53,7 @@ GEM
     lint_roller (1.1.0)
     logger (1.7.0)
     method_source (1.1.0)
-    minitest (5.26.1)
+    minitest (5.26.2)
     moab-versioning (6.1.2)
       druid-tools (>= 1.0.0)
       json
