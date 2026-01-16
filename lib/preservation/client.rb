@@ -34,6 +34,12 @@ module Preservation
     # timeouts
     class ConnectionFailedError < Error; end
 
+    Object = Struct.new('Object', :druid, :current_version, :ok_on_local_storage) do
+      def ok_on_local_storage?
+        ok_on_local_storage
+      end
+    end
+
     DEFAULT_API_VERSION = 'v1'
     DEFAULT_TIMEOUT = 300
     TOKEN_HEADER = 'Authorization'

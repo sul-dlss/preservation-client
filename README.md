@@ -65,9 +65,10 @@ Note that the preservation service is behind a firewall.
 - druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo000oo0000'
 - methods can be called as `client_instance.objects.method` or `Preservation::Client.objects.method`
 
-### Get the current version of a preserved object (Moab)
+### Get information about the preserved object (Moab)
 
 - `client.objects.current_version('oo000oo0000')` - returns latest version as an Integer
+- `client.objects.object('oo000oo0000')` - returns Preservation::client::Object
 
 ### Retrieve file signature (checksum) information
 

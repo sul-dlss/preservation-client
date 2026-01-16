@@ -37,6 +37,34 @@ RSpec.describe Preservation::Client::Objects do
     Preservation::Client.configure(url: prez_api_url, token: auth_token)
   end
 
+  describe '#object' do
+    let(:path) { "objects/#{druid}.json" }
+    let(:druid) { 'druid:oo000oo0000' }
+
+    context 'when API request succeeds' do
+      subject(:object) { client.object(druid) }
+
+      let(:result_version) { 3 }
+      let(:valid_response_body) do
+        {
+          druid: druid,
+          current_version: result_version,
+          ok_on_local_storage: false
+        }
+      end
+
+      before do
+        allow(client).to receive(:get_json).with(path, druid).and_return(valid_response_body)
+      end
+
+      it 'returns a Preservation::Client::Object' do
+        expect(object).to be_an_instance_of(Preservation::Client::Object)
+        expect(object.to_h).to eq valid_response_body
+        expect(object.ok_on_local_storage?).to be false
+      end
+    end
+  end
+
   describe '#current_version' do
     let(:path) { "objects/#{druid}.json" }
     let(:druid) { 'druid:oo000oo0000' }
@@ -45,12 +73,9 @@ RSpec.describe Preservation::Client::Objects do
       let(:result_version) { 3 }
       let(:valid_response_body) do
         {
-          id: 666,
           druid: druid,
           current_version: result_version,
-          created_at: '2019-09-06T13:01:29.076Z',
-          updated_at: '2019-09-15T13:01:29.076Z',
-          preservation_policy_id: 1
+          ok_on_local_storage: true
         }
       end
 

@@ -356,3 +356,36 @@ Style/SuperWithArgsParentheses: # new in 1.58
   Enabled: true
 Style/YAMLFileRead: # new in 1.53
   Enabled: true
+
+Gemspec/AttributeAssignment: # new in 1.77
+  Enabled: true
+Layout/EmptyLinesAfterModuleInclusion: # new in 1.79
+  Enabled: true
+Lint/UselessDefaultValueArgument: # new in 1.76
+  Enabled: true
+Lint/UselessOr: # new in 1.76
+  Enabled: true
+Naming/PredicateMethod: # new in 1.76
+  Enabled: true
+Style/ArrayIntersectWithSingleElement: # new in 1.81
+  Enabled: true
+Style/CollectionQuerying: # new in 1.77
+  Enabled: true
+Style/ComparableBetween: # new in 1.74
+  Enabled: true
+Style/EmptyStringInsideInterpolation: # new in 1.76
+  Enabled: true
+Style/HashFetchChain: # new in 1.75
+  Enabled: true
+Style/ItBlockParameter: # new in 1.75
+  Enabled: true
+Style/ModuleMemberExistenceCheck: # new in 1.82
+  Enabled: true
+Style/RedundantArrayFlatten: # new in 1.76
+  Enabled: true
+RSpec/IncludeExamples: # new in 3.6
+  Enabled: true
+RSpec/LeakyLocalVariable: # new in 3.8
+  Enabled: true
+RSpec/Output: # new in 3.9
+  Enabled: true
