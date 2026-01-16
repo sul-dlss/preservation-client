@@ -39,10 +39,16 @@ module Preservation
       end
 
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
+      # @return [Preservation::Client::Object] attributes of the Preserved Object
+      def object(druid)
+        resp_body = get_json("objects/#{druid}.json", druid)
+        Object.new(**resp_body)
+      end
+
+      # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
       # @return [Integer] the current version of the Preserved Object
       def current_version(druid)
-        resp_body = get_json("objects/#{druid}.json", druid)
-        resp_body[:current_version]
+        object(druid).current_version
       end
 
       # retrieve a content file from a Moab object
