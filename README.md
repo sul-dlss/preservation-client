@@ -87,6 +87,27 @@ Note that the preservation service is behind a firewall.
     - `client.objects.metadata(druid: 'oo000oo0000', filepath: 'identityMetadata.xml', version: '8')` - returns contents of identityMetadata.xml in version 8 of Moab object
 - `client.objects.signature_catalog('oo000oo0000')` - returns latest Moab::SignatureCatalog from Moab
 
+### Download content files safely to disk
+
+- `client.objects.content_to_file(...)` streams content to a tempfile in the destination directory, verifies integrity when requested, and atomically replaces the destination on success.
+
+```ruby
+client.objects.content_to_file(
+  druid: 'oo000oo0000',
+  filepath: 'my_file.pdf',
+  destination_filepath: '/tmp/my_file.pdf',
+  version: '1',
+  expected_md5: 'ffc0cc90e4215e0a3d822b04a8eab980'
+)
+```
+
+Behavior notes:
+
+- Retries transient failures (`ConnectionFailedError`, HTTP 5xx).
+- Does not retry other errors or integrity failures.
+- Raises `Preservation::Client::IntegrityError` on MD5 mismatch.
+- Removes temp files on success and failure and never promotes partial downloads to the destination path.
+
 ### Validate the Moab
 
 - `client.objects.validate_moab(druid: 'ooo000oo0000')` - validates that the Moab object, used by preservationWF to ensure we have a valid Moab before replicating to various preservation endpoints

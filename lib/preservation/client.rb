@@ -15,7 +15,15 @@ loader.setup
 module Preservation
   # REST API client wrapper for PreservationCatalog with error handling
   class Client
-    class Error < StandardError; end
+    # Base error class for preservation-client errors
+    class Error < StandardError
+      attr_reader :status
+
+      def initialize(message = nil, status: nil)
+        super(message)
+        @status = status
+      end
+    end
 
     # Error raised when server returns 404 Not Found
     class NotFoundError < Error; end
@@ -33,6 +41,9 @@ module Preservation
     # Error raised when Faraday gem fails to connect, e.g., on SSL errors or
     # timeouts
     class ConnectionFailedError < Error; end
+
+    # Error raised when downloaded file integrity verification fails
+    class IntegrityError < Error; end
 
     Object = Struct.new('Object', :druid, :current_version, :ok_on_local_storage) do
       def ok_on_local_storage?

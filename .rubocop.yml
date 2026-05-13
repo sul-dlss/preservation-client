@@ -45,7 +45,7 @@ RSpec/ExampleLength:
 
 # most tests should test a single thing
 RSpec/MultipleExpectations:
-  Max: 5 # default 1
+  Enabled: false
 
 RSpec/MultipleMemoizedHelpers:
   Enabled: false

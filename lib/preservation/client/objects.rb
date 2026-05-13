@@ -1,13 +1,16 @@
 # frozen_string_literal: true
 
+require 'digest'
+require 'fileutils'
 require 'moab'
+require 'tempfile'
 
 # NOTE:  this class makes use of data structures from moab-versioning gem,
 #  but it does NOT directly access any preservation storage roots
 module Preservation
   class Client
     # API calls that are about Preserved Objects
-    class Objects < VersionedApiService
+    class Objects < VersionedApiService # rubocop:disable Metrics/ClassLength
       # @param [String] druid - with or without prefix: 'druid:bb123cd4567' OR 'bb123cd4567'
       # @return [Hash] the checksums and filesize for the druid
       def checksum(druid:)
@@ -60,6 +63,36 @@ module Preservation
         file(druid, 'content', filepath, version, on_data: on_data)
       end
 
+      # retrieve a content file from a Moab object and write it to destination atomically
+      # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
+      # @param [String] filepath - the path of the file relative to the moab content directory
+      # @param [String] destination_filepath - absolute or relative path to desired destination file
+      # @param [String] version - the version of the file requested (defaults to nil for latest version)
+      # @param [String, nil] expected_md5 - optional expected md5 checksum for integrity validation
+      # @param [Integer] max_retries - number of retry attempts after the initial attempt
+      # @param [Float] delay_seconds - base delay for retry backoff
+      # @raise [Preservation::Client::IntegrityError] if the expected_md5 is provided and does not match the actual md5
+      # @raise [Preservation::Client::NotFoundError] if the specified file is not found
+      # @raise [Preservation::Client::Error] for other errors encountered during download
+      def content_to_file(druid:, filepath:, destination_filepath:, version: nil, expected_md5: nil, # rubocop:disable Metrics/ParameterLists
+                          max_retries: 3, delay_seconds: 0.5)
+        with_retries(max_retries: max_retries, delay_seconds: delay_seconds) do
+          temp_filepath = nil
+
+          begin
+            temp_filepath = download_to_tempfile(druid: druid, filepath: filepath,
+                                                 destination_filepath: destination_filepath,
+                                                 version: version)
+            verify_md5!(filepath: temp_filepath, expected_md5: expected_md5) if expected_md5
+
+            File.rename(temp_filepath, destination_filepath)
+            temp_filepath = nil
+          ensure
+            cleanup_tempfile(temp_filepath)
+          end
+        end
+      end
+
       # retrieve a manifest file from a Moab object
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' OR 'ab123cd4567'
       # @param [String] filepath - the path of the file relative to the moab manifest directory
@@ -103,6 +136,71 @@ module Preservation
       # @return the retrieved file
       def file(druid, category, filepath, version, on_data: nil)
         get("objects/#{druid}/file", { category: category, filepath: filepath, version: version }, on_data: on_data)
+      end
+
+      def with_retries(max_retries:, delay_seconds:)
+        attempt = 0
+
+        begin
+          yield
+        rescue StandardError => e
+          raise if !retryable_error?(e) || attempt >= max_retries
+
+          sleep_seconds = delay_seconds.to_f * (attempt + 1)
+          sleep(sleep_seconds) unless sleep_seconds.nil?
+          attempt += 1
+          retry
+        end
+      end
+
+      def download_to_tempfile(druid:, filepath:, destination_filepath:, version: nil)
+        destination_dir = File.dirname(destination_filepath)
+        FileUtils.mkdir_p(destination_dir)
+
+        tempfile = Tempfile.create(['preservation-client-', '.tmp'], destination_dir)
+        tempfile.binmode
+        temp_filepath = tempfile.path
+
+        begin
+          content(druid: druid, filepath: filepath, version: version,
+                  on_data: proc do |chunk, _size, _env|
+                    tempfile.write(chunk)
+                  end)
+          tempfile.flush
+          tempfile.fsync
+        rescue StandardError
+          cleanup_tempfile(temp_filepath)
+          raise
+        ensure
+          tempfile.close
+        end
+
+        temp_filepath
+      end
+
+      def verify_md5!(filepath:, expected_md5:)
+        actual_md5 = Digest::MD5.file(filepath).hexdigest
+        return if actual_md5.casecmp?(expected_md5)
+
+        raise IntegrityError,
+              "Downloaded file md5 mismatch for #{filepath}: expected #{expected_md5}, got #{actual_md5}"
+      end
+
+      def retryable_error?(error)
+        return true if error.is_a?(ConnectionFailedError)
+
+        return true if error.is_a?(Error) && (500..599).cover?(error.status)
+
+        false
+      end
+
+      def cleanup_tempfile(path)
+        return if path.nil?
+        return unless File.exist?(path)
+
+        File.delete(path)
+      rescue Errno::ENOENT
+        nil
       end
     end
   end
