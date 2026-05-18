@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'digest'
+require 'tmpdir'
+
 RSpec.describe Preservation::Client::Objects do
   let(:client) { described_class.new(connection: connection, api_version: '') }
 
@@ -246,6 +249,231 @@ RSpec.describe Preservation::Client::Objects do
 
       it 'raises an error' do
         expect { client.content(druid: file_druid, filepath: filename) }.to raise_error(Preservation::Client::UnexpectedResponseError, err_msg)
+      end
+    end
+  end
+
+  describe '#content_to_file' do
+    let(:source_filepath) { 'nested/content.pdf' }
+    let(:downloaded_content) { "hello world\n" }
+
+    def temp_download_files(dir)
+      Dir.glob(File.join(dir, 'preservation-client-*.tmp'))
+    end
+
+    context 'when successful' do
+      before do
+        allow(client).to receive(:content) do |on_data:, **_kwargs|
+          on_data.call('hello ', 6, nil)
+          on_data.call("world\n", 12, nil)
+        end
+      end
+
+      it 'writes streamed content and returns nil' do
+        Dir.mktmpdir do |dir|
+          destination = File.join(dir, 'download.pdf')
+
+          client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                 destination_filepath: destination, version: '2')
+
+          expect(File.read(destination)).to eq downloaded_content
+          expect(temp_download_files(dir)).to be_empty
+        end
+
+        expect(client).to have_received(:content) do |druid:, filepath:, version:, **_kwargs|
+          expect(druid).to eq file_druid
+          expect(filepath).to eq source_filepath
+          expect(version).to eq '2'
+        end
+      end
+    end
+
+    context 'when an existing destination file is present' do
+      before do
+        allow(client).to receive(:content) do |on_data:, **_kwargs|
+          on_data.call(downloaded_content, downloaded_content.bytesize, nil)
+        end
+      end
+
+      it 'atomically replaces an existing destination file' do
+        Dir.mktmpdir do |dir|
+          destination = File.join(dir, 'download.pdf')
+          File.write(destination, 'old content')
+
+          client.content_to_file(druid: file_druid, filepath: source_filepath, destination_filepath: destination)
+
+          expect(File.read(destination)).to eq downloaded_content
+        end
+      end
+    end
+
+    context 'when expected_md5 is provided' do
+      let(:expected_md5) { Digest::MD5.hexdigest(downloaded_content) }
+
+      before do
+        allow(client).to receive(:content) do |on_data:, **_kwargs|
+          on_data.call(downloaded_content, downloaded_content.bytesize, nil)
+        end
+      end
+
+      context 'when md5 matches' do
+        it 'is successful' do
+          Dir.mktmpdir do |dir|
+            destination = File.join(dir, 'download.pdf')
+
+            client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                   destination_filepath: destination,
+                                   expected_md5: expected_md5)
+
+            expect(File.read(destination)).to eq downloaded_content
+          end
+        end
+      end
+    end
+
+    context 'when md5 does not match' do
+      before do
+        allow(client).to receive(:content) do |on_data:, **_kwargs|
+          on_data.call(downloaded_content, downloaded_content.bytesize, nil)
+        end
+      end
+
+      it 'raises IntegrityError on md5 mismatch and leaves destination unchanged' do
+        Dir.mktmpdir do |dir|
+          destination = File.join(dir, 'download.pdf')
+          File.write(destination, 'existing destination')
+
+          expect do
+            client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                   destination_filepath: destination, expected_md5: 'wrongmd5')
+          end.to raise_error(Preservation::Client::IntegrityError)
+
+          expect(File.read(destination)).to eq 'existing destination'
+          expect(temp_download_files(dir)).to be_empty
+        end
+      end
+    end
+
+    context 'when ConnectionFailedError' do
+      before do
+        @attempts = 0
+        allow(client).to receive(:sleep)
+        allow(client).to receive(:content) do |on_data:, **_kwargs|
+          @attempts += 1
+          raise Preservation::Client::ConnectionFailedError, 'timeout' if @attempts < 3 # rubocop:disable RSpec/InstanceVariable
+
+          on_data.call(downloaded_content, downloaded_content.bytesize, nil)
+        end
+      end
+
+      it 'retries and then succeeds' do
+        Dir.mktmpdir do |dir|
+          destination = File.join(dir, 'download.pdf')
+
+          client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                 destination_filepath: destination, max_retries: 3, delay_seconds: 0)
+
+          expect(@attempts).to eq 3 # rubocop:disable RSpec/InstanceVariable
+          expect(File.read(destination)).to eq downloaded_content
+        end
+      end
+    end
+
+    context 'when status is set on Preservation::Client::Error' do
+      context 'when status is 5xx' do
+        before do
+          errors = [
+            Preservation::Client::Error.new('server failure 1', status: 503),
+            Preservation::Client::Error.new('server failure 2', status: 500)
+          ]
+          allow(client).to receive(:sleep)
+          allow(client).to receive(:content) do |on_data:, **_kwargs|
+            error = errors.shift
+            raise error if error
+
+            on_data.call(downloaded_content, downloaded_content.bytesize, nil)
+          end
+        end
+
+        it 'retries on 5xx errors when status is set on Preservation::Client::Error' do
+          Dir.mktmpdir do |dir|
+            destination = File.join(dir, 'download.pdf')
+
+            client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                   destination_filepath: destination, max_retries: 3, delay_seconds: 0)
+
+            expect(File.read(destination)).to eq downloaded_content
+            expect(client).to have_received(:sleep).with(0.0).at_least(:once)
+            expect(File.read(destination)).to eq downloaded_content
+          end
+        end
+      end
+
+      context 'when status is 4xx' do
+        before do
+          allow(client).to receive(:sleep)
+          allow(client).to receive(:content).and_raise(Preservation::Client::Error.new('client failure', status: 404))
+        end
+
+        it 'does not retry on 4xx errors when status is set on Preservation::Client::Error' do
+          Dir.mktmpdir do |dir|
+            destination = File.join(dir, 'download.pdf')
+
+            expect do
+              client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                     destination_filepath: destination, max_retries: 3, delay_seconds: 0)
+            end.to raise_error(Preservation::Client::Error, 'client failure')
+
+            expect(client).to have_received(:content).once
+            expect(client).not_to have_received(:sleep)
+          end
+        end
+      end
+
+      context 'when retries are exhausted' do
+        before do
+          allow(client).to receive(:sleep)
+          allow(client).to receive(:content).and_raise(Preservation::Client::ConnectionFailedError, 'network fail')
+        end
+
+        it 'removes temp files' do
+          Dir.mktmpdir do |dir|
+            destination = File.join(dir, 'download.pdf')
+
+            expect do
+              client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                     destination_filepath: destination, max_retries: 1, delay_seconds: 0)
+            end.to raise_error(Preservation::Client::ConnectionFailedError)
+
+            expect(temp_download_files(dir)).to be_empty
+            expect(File.exist?(destination)).to be false
+          end
+        end
+      end
+    end
+
+    context 'when streaming is interrupted' do
+      before do
+        allow(client).to receive(:sleep)
+        allow(client).to receive(:content) do |on_data:, **_kwargs|
+          on_data.call('partial-bytes', 13, nil)
+          raise Preservation::Client::ConnectionFailedError, 'stream interrupted'
+        end
+      end
+
+      it 'does not overwrite destination' do
+        Dir.mktmpdir do |dir|
+          destination = File.join(dir, 'download.pdf')
+          File.write(destination, 'safe destination')
+
+          expect do
+            client.content_to_file(druid: file_druid, filepath: source_filepath,
+                                   destination_filepath: destination, max_retries: 0, delay_seconds: 0)
+          end.to raise_error(Preservation::Client::ConnectionFailedError)
+
+          expect(File.read(destination)).to eq 'safe destination'
+          expect(temp_download_files(dir)).to be_empty
+        end
       end
     end
   end

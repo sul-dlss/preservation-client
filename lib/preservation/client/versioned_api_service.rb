@@ -47,7 +47,7 @@ module Preservation
             if env.status >= 300
               errmsg = "Preservation::Client.#{caller_locations.first.label} " \
                        "got #{env.status} from Preservation at #{req_url}"
-              raise http_exception_class(env.status), errmsg
+              raise http_exception_class(env.status).new(errmsg, status: env.status)
             end
             on_data.call(chunk, size, env)
           end
@@ -103,7 +103,7 @@ module Preservation
       rescue Faraday::Error => e
         errmsg = "Preservation::Client.#{caller_locations.first.label} " \
                  "got #{e.response[:status]} from Preservation at #{req_url}: #{e.response[:body]}"
-        raise http_exception_class(e.response[:status]), errmsg
+        raise http_exception_class(e.response[:status]).new(errmsg, status: e.response[:status])
       end
 
       # @param status_code [Integer] the HTTP status code to translate to an exception class
