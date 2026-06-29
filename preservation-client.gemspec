@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport', '>= 4.2'
   spec.add_dependency 'faraday', '~> 2.0'
+  spec.add_dependency 'faraday-retry', '~> 2.0'
   spec.add_dependency 'moab-versioning', '>= 5.0.0', '< 7'
   spec.add_dependency 'zeitwerk', '~> 2.1'
 

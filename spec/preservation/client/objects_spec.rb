@@ -4,9 +4,16 @@ require 'digest'
 require 'tmpdir'
 
 RSpec.describe Preservation::Client::Objects do
-  let(:client) { described_class.new(connection: connection, api_version: '') }
+  let(:client) do
+    described_class.new(connection: connection,
+                        streaming_connection: streaming_connection,
+                        retry_max: 3,
+                        retry_interval: 0,
+                        api_version: '')
+  end
 
   let(:connection) { Preservation::Client.instance.send(:connection) }
+  let(:streaming_connection) { Preservation::Client.instance.send(:streaming_connection) }
   let(:prez_api_url) { 'https://prezcat.example.com' }
   let(:auth_token) { 'my_secret_jwt_value' }
   let(:err_msg) { 'Mistakes were made.' }
@@ -371,7 +378,7 @@ RSpec.describe Preservation::Client::Objects do
           destination = File.join(dir, 'download.pdf')
 
           client.content_to_file(druid: file_druid, filepath: source_filepath,
-                                 destination_filepath: destination, max_retries: 3, delay_seconds: 0)
+                                 destination_filepath: destination, max: 3, interval: 0)
 
           expect(@attempts).to eq 3 # rubocop:disable RSpec/InstanceVariable
           expect(File.read(destination)).to eq downloaded_content
@@ -400,7 +407,7 @@ RSpec.describe Preservation::Client::Objects do
             destination = File.join(dir, 'download.pdf')
 
             client.content_to_file(druid: file_druid, filepath: source_filepath,
-                                   destination_filepath: destination, max_retries: 3, delay_seconds: 0)
+                                   destination_filepath: destination, max: 3, interval: 0)
 
             expect(File.read(destination)).to eq downloaded_content
             expect(client).to have_received(:sleep).with(0.0).at_least(:once)
@@ -421,7 +428,7 @@ RSpec.describe Preservation::Client::Objects do
 
             expect do
               client.content_to_file(druid: file_druid, filepath: source_filepath,
-                                     destination_filepath: destination, max_retries: 3, delay_seconds: 0)
+                                     destination_filepath: destination, max: 3, interval: 0)
             end.to raise_error(Preservation::Client::Error, 'client failure')
 
             expect(client).to have_received(:content).once
@@ -442,7 +449,7 @@ RSpec.describe Preservation::Client::Objects do
 
             expect do
               client.content_to_file(druid: file_druid, filepath: source_filepath,
-                                     destination_filepath: destination, max_retries: 1, delay_seconds: 0)
+                                     destination_filepath: destination, max: 1, interval: 0)
             end.to raise_error(Preservation::Client::ConnectionFailedError)
 
             expect(temp_download_files(dir)).to be_empty
@@ -468,7 +475,7 @@ RSpec.describe Preservation::Client::Objects do
 
           expect do
             client.content_to_file(druid: file_druid, filepath: source_filepath,
-                                   destination_filepath: destination, max_retries: 0, delay_seconds: 0)
+                                   destination_filepath: destination, max: 0, interval: 0)
           end.to raise_error(Preservation::Client::ConnectionFailedError)
 
           expect(File.read(destination)).to eq 'safe destination'
