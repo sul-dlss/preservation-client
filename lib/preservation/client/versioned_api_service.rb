@@ -4,14 +4,15 @@ module Preservation
   class Client
     # @abstract API calls to a versioned endpoint
     class VersionedApiService
-      def initialize(connection:, api_version: DEFAULT_API_VERSION)
+      def initialize(connection:, api_version: DEFAULT_API_VERSION, streaming_connection: nil)
         @connection = connection
         @api_version = api_version
+        @streaming_connection = streaming_connection
       end
 
       private
 
-      attr_reader :connection, :api_version
+      attr_reader :connection, :api_version, :streaming_connection
 
       # @param path [String] path to be appended to connection url (no leading slash)
       def get_json(path, object_id)
@@ -42,7 +43,7 @@ module Preservation
         return http_response(:get, path, params) unless on_data
 
         req_url = "#{api_version}/#{path}"
-        connection.get("#{api_version}/#{path}", params) do |req|
+        (streaming_connection || connection).get("#{api_version}/#{path}", params) do |req|
           req.options.on_data = proc do |chunk, size, env|
             if env.status >= 300
               errmsg = "Preservation::Client.#{caller_locations.first.label} " \

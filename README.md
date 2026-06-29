@@ -60,6 +60,11 @@ See https://github.com/sul-dlss/preservation_catalog#api for info on obtaining a
 
 Note that the preservation service is behind a firewall.
 
+### Retries
+HTTP GET requests will be automatically retried for certain errors. The number of retries (`retries_max`) and interval between retries (`retry_interval`) can be specified as part of the configuration of the client.
+
+Note that there is special retry behavior (cleaning up files on failure) for `content_to_file`, but it uses the same configuration.
+
 ## API Coverage
 
 - druids may be with or without the "druid:" prefix - 'oo000oo0000' or 'druid:oo000oo0000'

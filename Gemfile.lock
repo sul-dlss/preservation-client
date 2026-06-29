@@ -4,6 +4,7 @@ PATH
     preservation-client (7.4.0)
       activesupport (>= 4.2)
       faraday (~> 2.0)
+      faraday-retry (~> 2.0)
       moab-versioning (>= 5.0.0, < 7)
       zeitwerk (~> 2.1)
 
@@ -46,6 +47,8 @@ GEM
       logger
     faraday-net_http (3.4.4)
       net-http (~> 0.5)
+    faraday-retry (2.4.0)
+      faraday (~> 2.0)
     hashdiff (1.2.1)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
