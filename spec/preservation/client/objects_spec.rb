@@ -579,13 +579,27 @@ RSpec.describe Preservation::Client::Objects do
   end
 
   describe '#validate_moab' do
-    subject(:request) { client.validate_moab(druid: druid) }
+    subject(:request) { client.validate_moab(druid: druid, lane_id: lane_id) }
 
     let(:druid) { 'oo000oo0000' }
+    let(:lane_id) { nil }
 
     context 'when API request succeeds' do
       before do
         stub_request(:get, "https://prezcat.example.com/objects/#{druid}/validate_moab")
+          .to_return(status: 200, body: 'ok', headers: {})
+      end
+
+      it 'returns ok' do
+        expect(request).to eq 'ok'
+      end
+    end
+
+    context 'when API request succeeds with lane' do
+      let(:lane_id) { 'high' }
+
+      before do
+        stub_request(:get, "https://prezcat.example.com/objects/#{druid}/validate_moab?lane-id=high")
           .to_return(status: 200, body: 'ok', headers: {})
       end
 

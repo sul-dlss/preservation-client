@@ -115,7 +115,7 @@ Behavior notes:
 
 ### Validate the Moab
 
-- `client.objects.validate_moab(druid: 'ooo000oo0000')` - validates that the Moab object, used by preservationWF to ensure we have a valid Moab before replicating to various preservation endpoints
+- `client.objects.validate_moab(druid: 'ooo000oo0000', lane_id: 'high)` - validates that the Moab object, used by preservationWF to ensure we have a valid Moab before replicating to various preservation endpoints
 
 ### Get difference information between passed contentMetadata.xml and files in the Moab
 

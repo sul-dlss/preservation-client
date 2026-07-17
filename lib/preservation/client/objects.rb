@@ -118,10 +118,11 @@ module Preservation
       # calls the endpoint to queue a ValidateMoab job for a specific druid
       # typically called by a preservationIngestWF robot
       # @param [String] druid - with or without prefix: 'druid:ab123cd4567' or 'ab123cd4567'
+      # @param [String, nil] lane_id - low, default, or high
       # @return [String] "ok" when job queued
       # @raise [Preservation::Client::NotFoundError] when druid is not found
-      def validate_moab(druid:)
-        get("objects/#{druid}/validate_moab", {}, on_data: nil)
+      def validate_moab(druid:, lane_id: nil)
+        get("objects/#{druid}/validate_moab", { 'lane-id': lane_id }.compact, on_data: nil)
       end
 
       # convenience method for retrieving latest Moab::SignatureCatalog from a Moab object,
