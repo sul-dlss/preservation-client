@@ -5,7 +5,7 @@ plugins:
   - rubocop-rake
 
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 4.0
   SuggestExtensions: false
   DisplayCopNames: true
   Include:
@@ -21,6 +21,11 @@ AllCops:
     - 'spec/spec_helper.rb'
     - 'spec/rails_helper.rb' # rails only
     - 'vendor/**/*' # gems only (?)
+
+# Development uses Ruby 4, but the gem still supports its existing >= 3.0 consumers.
+Gemspec/RequiredRubyVersion:
+  Exclude:
+    - preservation-client.gemspec
 
 Layout/EmptyLinesAroundClassBody:
   Enabled: false
